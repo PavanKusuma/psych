@@ -1,6 +1,6 @@
 'use client'
 
-import Registration from '../../(features)/(campus)/registration/form/page'
+
 import Dashboard from '../../(features)/(campus)/dashboard/page'
 import { Inter } from 'next/font/google'
 import { SpinnerGap } from 'phosphor-react'

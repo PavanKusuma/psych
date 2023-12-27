@@ -41,10 +41,10 @@ const inter = Inter({ subsets: ['latin'] })
       setSelectedTab('Student360')
       router.push('/students/search')
     }
-    function navigateRegistration(){
-      setSelectedTab('Registration')
-      router.push('/registration')
-    }
+    // function navigateRegistration(){
+    //   setSelectedTab('Registration')
+    //   router.push('/registration')
+    // }
 
     return (
 
@@ -77,7 +77,7 @@ const inter = Inter({ subsets: ['latin'] })
             <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Student360' ? styles.text1 : styles.text2}`} onClick={navigateStudents.bind(this)}><UserFocus className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Student 360</div>
             <div className={`${styles.horizontalsection} ${inter.className} ${styles.text2}`} ><ArrowSquareOut className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Outing</div>
             <div className={`${styles.horizontalsection} ${inter.className} ${styles.text2}`} ><PresentationChart className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Reports</div>
-            <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Registration' ? styles.text1 : styles.text2}`} onClick={navigateRegistration.bind(this)}><IdentificationBadge className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Visitor pass</div>
+            {/* <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Registration' ? styles.text1 : styles.text2}`} onClick={navigateRegistration.bind(this)}><IdentificationBadge className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Visitor pass</div> */}
             {/* <div className={`${styles.horizontalsection} ${inter.className} ${styles.text2}`} ><CalendarCheck className={styles.menuicon} /> Control campus outing</div> */}
           </div>
           {children}

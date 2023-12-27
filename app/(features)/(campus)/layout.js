@@ -2,13 +2,11 @@
 import { Inter } from 'next/font/google'
 import styles from '../../../app/page.module.css'
 import { Monitor, UserFocus, ArrowSquareOut, PresentationChart, IdentificationBadge, CalendarCheck, UserPlus, FileImage, PersonSimpleRun } from 'phosphor-react'
-import Image from 'next/image'
+
 import Biscuits from 'universal-cookie'
 const biscuits = new Biscuits
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react';
-import Registration from './registration/form/page'
-import SearchStudents from './student360/search/page'
 import { Toaster } from "@/app/components/ui/toaster"
 
 const inter = Inter({ subsets: ['latin'] })

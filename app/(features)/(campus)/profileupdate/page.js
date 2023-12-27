@@ -153,7 +153,7 @@ async function submitHere(){
                                 <div style={{ width:'100%'}}>
                                     {/* <p className={`${inter.className} ${styles.text1}`}>Anonymous chat</p> */}
                                     <h3 className="font-semibold leading-none tracking-tight">Anonymous chat</h3><br/>
-                                    <p className="text-sm text-muted-foreground">Your details won't be disclosed to the receiver</p>
+                                    <p className="text-sm text-muted-foreground">Your details are not disclosed to the receiver</p>
                                     {/* <p className={`${inter.className} ${styles.text3}`}>Your details won't be disclosed to the receiver</p> */}
                                     <br/>
                                         

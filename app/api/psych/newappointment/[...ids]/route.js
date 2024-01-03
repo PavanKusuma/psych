@@ -6,13 +6,11 @@ const OneSignal = require('onesignal-node')
 
 const client = new OneSignal.Client(process.env.ONE_SIGNAL_APPID, process.env.ONE_SIGNAL_APIKEY)
 
-// create new outing request by the student
+// create new appointment request by the student
 // returns the data on success
-// key, requestId, requestType, oRequestId, collegeId, description, requestFrom, requestTo, duration, isAllowed, requestDate, username, phoneNumber
-//////// based on the requestType create the request
 
-// requestType (1 – local outing, 2 – out-city outing, 3 – official outing, 4 – temporary day pass)
-// key, requestId, requestType, oRequestId, collegeId, description, requestFrom, requestTo, duration, isAllowed, requestDate, username, phoneNumber
+// mode (0 – inperson, 1 – googlemeet, 2 – zoom)
+// appointmentId, collegeId, adminId, topic, description, requestDate, isOpen, requestStatus, notes, mode, createdOn, updatedOn, campusId
 export async function GET(request,{params}) {
 
     // get the pool connection to db
@@ -29,48 +27,40 @@ export async function GET(request,{params}) {
                 try {
 
                     // check if any active request exists for the provided collegeId
-                    const q0 = 'select collegeId from psych_appointment where collegeId="'+params.ids[4]+'" and isOpen = 1';
+                    const q0 = 'select collegeId from psych_appointment where collegeId="'+params.ids[2]+'" and isOpen = 1';
                     const [rows0, fields0] = await connection.execute(q0);
                     
                     if(rows0.length == 0){
 
                         // create query for insert
-                        const q = 'INSERT INTO psych_appointment (collegeId, description, requestDate, isOpen, requestStatus) VALUES ( ?, ?, ?, ?, ?)';
+                        const q = 'INSERT INTO psych_appointment (appointmentId, collegeId, adminId, topic, description, requestDate, isOpen, requestStatus, notes, mode, createdOn, updatedOn, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
                         // create new request
-                        const [rows, fields] = await connection.execute(q, [ params.ids[1], decodeURIComponent(params.ids[2]), currentDate, 1,  "Submitted"]);
+                        const [rows, fields] = await connection.execute(q, [ params.ids[1], params.ids[2], params.ids[3], params.ids[4], decodeURIComponent(params.ids[5]), params.ids[6], 1,  "Submitted", "-", 0, currentDate, currentDate, params.ids[7]]);
                         connection.release();
 
-                        // send SMS to parent
-                        // sendSMS(params.ids[11], params.ids[12], dayjs(params.ids[6]).format('DD-MM-YY hh:mm A'), dayjs(params.ids[7]).format('DD-MM-YY hh:mm A'))
-                        // sendSMS(params.ids[11], params.ids[12], dayjs(params.ids[6]).format('DD-MM-YY hh:mm A'), dayjs(params.ids[7]).format('YYYY-MM-DD'))
-
                         // get the gcm_regIds of SuperAdmin and branch admin to notify
-                        const [nrows, nfields] = await connection.execute('SELECT gcm_regId FROM `user` where role IN ("SuperAdmin_P")');
+                        // const [nrows, nfields] = await connection.execute('SELECT gcm_regId FROM `user` where role IN ("SuperAdmin_P")');
 
-                        // get the gcm_regIds list from the query result
-                        var gcmIds = [];
-                        for (let index = 0; index < nrows.length; index++) {
-                          const element = nrows[index].gcm_regId;
-                          if(element.length > 3)
-                            gcmIds.push(element); 
-                        }
+                        // // get the gcm_regIds list from the query result
+                        // var gcmIds = [];
+                        // for (let index = 0; index < nrows.length; index++) {
+                        //   const element = nrows[index].gcm_regId;
+                        //   if(element.length > 3)
+                        //     gcmIds.push(element); 
+                        // }
 
-                        // var gcmIds = 
-                        // console.log(gcmIds);
+                        // // var gcmIds = 
+                        // // console.log(gcmIds);
 
-                        // send the notification
-                        const notificationResult = await send_notification('New appointment request received!', gcmIds, 'Multiple');
+                        // // send the notification
+                        // const notificationResult = await send_notification('New appointment request received!', gcmIds, 'Multiple');
                             
-                        // return successful update
-                        return Response.json({status: 200, message:'Request submitted!', notification: notificationResult}, {status: 200})
+                        // // return successful update
+                        // return Response.json({status: 200, message:'Request submitted and waiting for confirmation!', notification: notificationResult}, {status: 200})
 
                         // return the user data
-                        // return Response.json({status: 200, message:'Request submitted!'}, {status: 200})                   
+                        return Response.json({status: 200, message:'Request submitted!'}, {status: 200})                   
                       
-                      
-                             
-                      
-
                     }
                     else {
                       // return message to close active requests
@@ -97,19 +87,6 @@ export async function GET(request,{params}) {
     
   }
 
-  // function to call the SMS API
-  async function sendSMS(name, number, from, to){
-
-    const result  = await fetch("http://webprossms.webprosindia.com/submitsms.jsp?user=SVCEWB&key=c280f55d6bXX&mobile="+number+"&message=Dear Parent, your ward, "+name+" has applied for outing from "+from+" to "+to+".  SVECWB Hostels&senderid=SVECWB&accusage=1&entityid=1001168809218467265&tempid=1007149047352803219", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-          },
-        });
-          const queryResult = await result.text() // get data
-        //   console.log(queryResult);
-  }
   
 
   // send the notification using onesignal.

@@ -15,6 +15,7 @@ const client = new OneSignal.Client(process.env.ONE_SIGNAL_APPID, process.env.ON
 // Stage2 –– To be InMeeting –– both
 // Stage3 –– To be Completed
 // Stage4 –– To be Cancelled –– Move the request to closed by updating isOpen = 0 and status to Canceled – This can be done by Student or Admin (Add extra comment to mention who did it)
+// Stage5 –– Just meeting time update to be done by admin or user
 
 // 1 stage
 // 2 appointmentId
@@ -53,6 +54,7 @@ export async function GET(request,{params}) {
                         const [rows, fields] = await connection.execute('UPDATE psych_appointment SET adminId ="'+params.ids[3]+'", adminName ="'+params.ids[4]+'", requestStatus ="Confirmed", updatedOn ="'+params.ids[5]+'" where appointmentId = "'+params.ids[2]+'"');
                         // const [rows, fields] = await connection.execute('UPDATE psych_appointment SET adminId ="'+params.ids[4]+'", requestStatus ="'+params.ids[6]+'", updatedOn ="'+params.ids[7]+'" where appointmentId = "'+params.ids[2]+'"');
 
+                        // get the player Id of user using collegeId
                         const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[6]+'"');
                         connection.release();
     
@@ -120,20 +122,49 @@ export async function GET(request,{params}) {
                 
             }
             
-            // else if(params.ids[4] == 'OutingAssistant'){
             // 0. Pass
             // 1. stage
             // 2. appointmentId
-            // 3. status
-            // 4. updatedOn
-            // 5. playerId
+            // 3. adminId
+            // 4. collegeId
+
             else if(params.ids[1] == 'S4'){ 
                 try {
                     const [rows, fields] = await connection.execute('UPDATE psych_appointment SET isOpen = 0, requestStatus ="Cancelled", updatedOn="'+currentDate+'" where appointmentId = "'+params.ids[2]+'"');
                     connection.release();
                     
+                    // get the player Id of user using collegeId
+                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[4]+'"');
+                    connection.release();
+
                     // send the notification
-                    const notificationResult = await send_notification('✅ Your appointment is cancelled', params.ids[6], 'Single');
+                    const notificationResult = await send_notification('✅ Your appointment is cancelled', rows1[0].gcm_regId, 'Single');
+                    
+                    // return successful update
+                    return Response.json({status: 200, message:'Updated!',notification: notificationResult,}, {status: 200})
+                } catch (error) { // error updating
+                    return Response.json({status: 404, message:'No request found!'+error.message}, {status: 200})
+                }
+                
+            }
+            
+            // 0. Pass
+            // 1. stage
+            // 2. appointmentId
+            // 4. requestDate
+            // 5. adminId
+            // 6. collegeId
+            else if(params.ids[1] == 'S5'){ 
+                try {
+                    const [rows, fields] = await connection.execute('UPDATE psych_appointment SET requestDate="'+params.ids[3]+'", updatedOn="'+currentDate+'" where appointmentId = "'+params.ids[2]+'"');
+                    connection.release();
+                    
+                    // get the player Id of user using collegeId
+                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[5]+'"');
+                    connection.release();
+
+                    // send the notification
+                    const notificationResult = await send_notification('🗓️ Your appointment time is updated', rows1[0].gcm_regId, 'Single');
                     
                     // return successful update
                     return Response.json({status: 200, message:'Updated!',notification: notificationResult,}, {status: 200})

@@ -31,7 +31,7 @@ export async function GET(request,{params}) {
                     let query = '';
                     // check what type of requests to be shown
                     
-                    query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY requestDate DESC LIMIT 20 OFFSET '+params.ids[4];
+                    query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
                     const [rows, fields] = await connection.execute(query);
                     connection.release();
 
@@ -49,7 +49,7 @@ export async function GET(request,{params}) {
 
                 // check for the user role
                 // if SuperAdmin, get all the requests w.r.t status
-                else if(params.ids[1] == 'P_Admin'){
+                else if(params.ids[1] == 'PsychAdmin'){
 
                     // verify what type of requests admin is asking
                     let query = '';
@@ -70,7 +70,7 @@ export async function GET(request,{params}) {
                         connection.release();
                     
                         // check if user is found
-                        if(rows2.length > 0){
+                        if(rows2.length > 0 || rows1.length > 0){
                             // return the requests data
                             return Response.json({status: 200, message:'Data found!', newdata: rows1, olddata: rows2}, {status: 200})
 

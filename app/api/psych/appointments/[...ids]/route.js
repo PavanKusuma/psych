@@ -2,13 +2,6 @@ import pool from '../../../db'
 import { Keyverify } from '../../../secretverify';
 import dayjs from 'dayjs'
 
-// get the requests based on the user role and timing
-// params used for this API
-// key, role, status, offset, collegeId, branch, requestType, hostelId
-
-// requestType – if 3, its official request, 2 – Outcity, 1 – Local, 4 – Temporary day scholar
-// hostelId – Used for fetching specific hostel official requests
-
 // S1 ADMIN ––––– get the appointments that are unassigned and assigned by campus by duration
 // S2 ADMIN ––––– get the appointments by user
 // S3 USERS ––––– get the appointments that are mine by requestDate

@@ -126,7 +126,7 @@ export async function GET(request,{params}) {
             // 5. playerId
             else if(params.ids[1] == 'S4'){ 
                 try {
-                    const [rows, fields] = await connection.execute('UPDATE psych_appointment SET isOpen = 0, requestStatus ="Cancelled", updatedOn="'+params.ids[5]+'" where appointmentId = "'+params.ids[2]+'"');
+                    const [rows, fields] = await connection.execute('UPDATE psych_appointment SET isOpen = 0, requestStatus ="Cancelled", updatedOn="'+currentDate+'" where appointmentId = "'+params.ids[2]+'"');
                     connection.release();
                     
                     // send the notification

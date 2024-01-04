@@ -50,12 +50,15 @@ export async function GET(request,{params}) {
             if(params.ids[1] == 'S1'){
                     
                     try {
-                        const [rows, fields] = await connection.execute('UPDATE psych_appointment SET adminId ="'+params.ids[3]+'", requestStatus ="Confirmed", updatedOn ="'+params.ids[5]+'" where appointmentId = "'+params.ids[2]+'"');
+                        const [rows, fields] = await connection.execute('UPDATE psych_appointment SET adminId ="'+params.ids[3]+'", adminName ="'+params.ids[4]+'", requestStatus ="Confirmed", updatedOn ="'+params.ids[5]+'" where appointmentId = "'+params.ids[2]+'"');
                         // const [rows, fields] = await connection.execute('UPDATE psych_appointment SET adminId ="'+params.ids[4]+'", requestStatus ="'+params.ids[6]+'", updatedOn ="'+params.ids[7]+'" where appointmentId = "'+params.ids[2]+'"');
+
+                        const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[6]+'"');
                         connection.release();
     
+
                         // send the notification
-                        const notificationResult = await send_notification('🙌 Your appointment is confirmed!', params.ids[6], 'Single');
+                        const notificationResult = await send_notification('🙌 Your appointment is confirmed!', rows1[0].gcm_regId, 'Single');
 
                         // return the response
                         return Response.json({status: 200,message: 'Updated!',notification: notificationResult,});

@@ -30,7 +30,7 @@ export async function GET(request,{params}) {
                   if(params.ids[1] == 'S1'){
 
                       // create query for insert
-                      const q = 'INSERT INTO psych_chat (collegeId, adminId, message, sentAt, sendBy, chatDate, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?)';
+                      const q = 'INSERT INTO psych_chat (collegeId, adminId, message, sentAt, sentBy, chatDate, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?)';
                       // create new message
                       const [rows, fields] = await connection.execute(q, [ params.ids[2], params.ids[3], decodeURIComponent(params.ids[4]), sentAt, params.ids[5], currentDate, params.ids[6]]);
                       connection.release();
@@ -63,7 +63,7 @@ export async function GET(request,{params}) {
                   }
                   else if(params.ids[1] == 'S3'){
                       // get the messages of user
-                      const query1 = `select * from psych_chat where collegeId=? ORDER BY sentAt DESC LIMIT 20 OFFSET ?`;
+                      const query1 = `select * from psych_chat where collegeId=? ORDER BY sentAt ASC LIMIT 20 OFFSET ?`;
                       
                       const [rows1, fields1] = await connection.execute(query1, [params.ids[2], params.ids[3]]);
                       connection.release();
@@ -80,7 +80,7 @@ export async function GET(request,{params}) {
                   }
                   else if(params.ids[1] == 'S4'){
                       // get the messages of user by admin
-                      const query1 = `select collegeId,MAX(sentAt) as sentAt from psych_chat where adminId LIKE ? GROUP BY collegeId ORDER BY sentAt DESC LIMIT 20 OFFSET ?`;
+                      const query1 = `select collegeId,MAX(sentAt) as sentAt from psych_chat where adminId LIKE ? GROUP BY collegeId ORDER BY sentAt ASC LIMIT 20 OFFSET ?`;
                                             
                       const [rows1, fields1] = await connection.execute(query1, ["%"+params.ids[2]+"%", params.ids[3]]);
                       connection.release();

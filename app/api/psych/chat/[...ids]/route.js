@@ -30,7 +30,7 @@ export async function GET(request,{params}) {
                   if(params.ids[1] == 'S1'){
 
                       // create query for insert
-                      const q = 'INSERT INTO psych_chat (chatId, collegeId, adminId, message, sentAt, sentBy, chatDate, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?)';
+                      const q = 'INSERT INTO psych_chat (chatId, collegeId, adminId, message, sentAt, sentBy, chatDate, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)';
                       // create new message
                       const [rows, fields] = await connection.execute(q, [ params.ids[2], params.ids[3], params.ids[4], decodeURIComponent(params.ids[5]), sentAt, params.ids[6], currentDate, params.ids[7]]);
                       connection.release();

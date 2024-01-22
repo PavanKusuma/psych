@@ -2,17 +2,11 @@ import pool from '../../../db'
 import { Keyverify } from '../../../secretverify';
 import dayjs from 'dayjs'
 
-// S1 ADMIN ––––– get the appointments that are unassigned and assigned by campus by duration
-// S2 ADMIN ––––– get the appointments by user
-// S3 USERS ––––– get the appointments that are mine by requestDate
-// S4 SUPERADMIN ––––– get all appointments 
-
 // 1 role – SuperAdmin / PAdmin / Student
-// 2 requestStatus – Approved, Issued or All
-// 3 offset – 0
-// 4 collegeId - Super33
-// 5 campusId - SVECW or All
-// 6 assessmentId 
+// 2 offset – 0
+// 3 collegeId - Super33
+// 4 campusId - SVECW or All
+// 5 assessmentId 
 export async function GET(request,{params}) {
 
     // get the pool connection to db
@@ -24,10 +18,11 @@ export async function GET(request,{params}) {
         if(await Keyverify(params.ids[0])){
 
                     let query = '';
+                    let query2 = '';
                     // check what type of requests to be shown
                     
-                    query = 'SELECT * FROM psych_questions WHERE assessmentId = "'+params.ids[6]+'" ORDER BY sequence DESC LIMIT 50 OFFSET '+params.ids[3];
-                    query2 = 'SELECT * FROM psych_results WHERE assessmentId = "'+params.ids[6];
+                    query = 'SELECT * FROM psych_questions WHERE assessmentId = "'+params.ids[5]+'" ORDER BY sequence DESC LIMIT 50 OFFSET '+params.ids[3];
+                    query2 = 'SELECT * FROM psych_results WHERE assessmentId = "'+params.ids[5];
                     const [rows, fields] = await connection.execute(query);
                     const [rows1, fields1] = await connection.execute(query2);
                     connection.release();

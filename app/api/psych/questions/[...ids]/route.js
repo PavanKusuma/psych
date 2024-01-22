@@ -22,7 +22,7 @@ export async function GET(request,{params}) {
                     // check what type of requests to be shown
                     
                     query = 'SELECT * FROM psych_questions WHERE assessmentId = "'+params.ids[5]+'" ORDER BY sequence DESC LIMIT 50 OFFSET '+params.ids[2];
-                    query2 = 'SELECT * FROM psych_results WHERE assessmentId = "'+params.ids[5];
+                    query2 = 'SELECT * FROM psych_results WHERE assessmentId = "'+params.ids[5]+'"';
                     const [rows, fields] = await connection.execute(query);
                     const [rows1, fields1] = await connection.execute(query2);
                     connection.release();

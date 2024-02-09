@@ -53,8 +53,8 @@ export async function GET(request,{params}) {
                     if(rows[0].email.length > 2){
                         // send mail with defined transport object
                         let info = await transporter.sendMail({
-                            name: 'TRUST',
-                            from: '"Trust" <smartcampus@svecw.edu.in>', // sender address
+                            name: 'Dear Me,',
+                            from: '"Dear Me," <smartcampus@svecw.edu.in>', // sender address
                             // from: '"Smart campus" <hello.helpmecode@gmail.com>', // sender address
                             to: rows[0].email, // list of receivers
                             subject: "OTP for "+rows[0].collegeId+" login", // Subject line

@@ -70,7 +70,7 @@ export default function Vertification() {
             const obj = JSON.parse(decodeURIComponent(cookieValue))
             
             // for now, only admins can login in to this portal
-            if(obj.role == 'SuperAdmin_P' || obj.role == 'Admin_P')
+            if(obj.role == 'PsychAdmin')
             {
                 setSession(true)
                 // router.push('/dashboard')
@@ -151,7 +151,7 @@ async function loginHere(){
                 // As OTP is already sent, show the OTP prompt text field
 
                 // for now, only allow if user is admin
-                if(resultData.data.role == 'SuperAdmin_P' || resultData.data.role == 'Admin_P'){
+                if(resultData.data.role == 'PsychAdmin'){
                     // otp sent
                     setotpSent(true)
                 }

@@ -65,8 +65,9 @@ export default function ProfileUpdate() {
     // get the user and fire the data fetch
     useEffect(()=>{
 
-        const socket = io("http://localhost:3000");
-
+        const socket = io("https://piltovr.com/socket.io", {
+            transports: ['websocket'] // Only use WebSocket (if supported)
+          }); // server address of the socket
 
         let cookieValue = biscuits.get('sc_user_detail')
             if(cookieValue){
@@ -84,7 +85,8 @@ export default function ProfileUpdate() {
             }
 
         socket.on('message',(message,roomName1,date) => {
-            console.log("This is the message from server: \n"+message,roomName1,roomName,collegeId);
+            console.log("This is the message from server: \n"+message,roomName1, roomName, collegeId);
+            // console.log("This is the message from server: \n"+message,roomName1,roomName,collegeId);
             
             // set the messages
             if(roomName1 == roomName){
@@ -94,19 +96,45 @@ export default function ProfileUpdate() {
                 console.log('Not this id');
             }
         })
+        // socket.on('message1',(message) => {
+        //     console.log("This is the message from server1: \n"+message);
+            
+        // })
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+        
+        socket.on('message2', (message) => {
+            console.log("This is the message from server1: \n"+message);
+        }, (error) => {
+            if (error) {
+                console.error("Error receiving message:", error);
+            }
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+        });
+        
         setSocket(socket)
   
 
-    },[collegeId, messages]);
+    },[]);
 
     const onChangeHandler = (e) => {
         // console.log(e.target.value);
         setMessage(e.target.value);
     };
     const onSubmitHandler = (msg, rm) => {
-        console.log(messages.length);
-        console.log(rm);
-        socket.emit('message',msg,rm,today)
+        
+        console.log(rm + ' : '+ msg);
+        // socket.emit('message',msg,rm,today)
+        // socket.emit('message1',msg)
+        socket.emit('message1', msg, (error) => {
+            if (error) {
+                console.error("Error sending message:", error);
+            }
+        });
         setMessage('');
         // socket.emit('message', e.target.value)
     };

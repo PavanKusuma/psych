@@ -68,7 +68,25 @@ const [messagesList, setMessagesList] = useState([]); // List of message and dat
     // get the user and fire the data fetch
     useEffect(()=>{
 
-        const socket = io("http://localhost:3000");
+        const socket = io("https://piltovr.com/socket.io");
+
+        socket.on('help', (data) => {
+            console.log("This is the message from server1: \n"+data);
+            const chatObj = JSON.parse(data);
+
+        }, (error) => {
+            if (error) {
+                console.error("Error receiving message:", error);
+            }
+        });
+        
+        socket.on('message2', (message) => {
+            console.log("This is the message from server1: \n"+message);
+        }, (error) => {
+            if (error) {
+                console.error("Error receiving message:", error);
+            }
+        });
 
         socket.on('message',(message,roomName1,date) => {
             console.log("Message : \n"+message);
@@ -108,7 +126,13 @@ const [messagesList, setMessagesList] = useState([]); // List of message and dat
             //   ]);
            
             //   allList.push(iList)
-        })
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+        });
+        
+        
         setSocket(socket)
 
         
@@ -166,7 +190,31 @@ const [messagesList, setMessagesList] = useState([]); // List of message and dat
     };
 
     const onSubmitHandler = (msg, rm) => {
-        socket.emit('message',msg,rm,today)
+        // socket.emit('message',msg,rm,today)
+        // socket.emit('message1',msg)
+
+        // chatMessage.chatId = C;
+        // chatMessage.collegeId = collegeId;
+        // chatMessage.adminId = '-';
+        // chatMessage.message = messageController.text;
+        // chatMessage.sentAt = "just now";
+        // chatMessage.sentBy = collegeId;
+        // chatMessage.chatDate = today.toString();
+        // chatMessage.campusId = campusId;
+
+        const obj = {
+            chatId : 'C',
+            collegeId: 'SS33',
+            adminId: 'P33',
+            message: msg,
+            sentAt: today,
+            sentBy: 'P33',
+            chatDate: today,
+            campusId: 'SVECW',
+
+          };
+
+        socket.emit('helpme',JSON.stringify(obj))
         // socket.emit('message', e.target.value)
     };
 

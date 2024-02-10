@@ -21,18 +21,26 @@ export async function GET(request,{params}) {
                 // check for the user role
                 // if SuperAdmin, get all the requests w.r.t status
                 let query = '';
-                if(params.ids[3] != null){
+                if(params.ids[3] == 'EMOTION') {
 
-                    // get the feelings for specific emotion
-                    query = 'SELECT emotion,feeling,description,media FROM psych_emotions where emotion = "'+params.ids[3]+'" ORDER BY feeling ASC LIMIT 50 OFFSET '+params.ids[2];
+                    if(params.ids[4] != 'All'){
+
+                        // get the feelings for specific emotion
+                        query = 'SELECT emotion,feeling,description,media FROM psych_emotions where emotion = "'+params.ids[4]+'" ORDER BY feeling ASC LIMIT 50 OFFSET '+params.ids[2];
+
+                    }
+                    else {
+                        
+                        // get the feelings
+                        query = 'SELECT emotion,feeling,description,media FROM psych_emotions ORDER BY feeling ASC LIMIT 50 OFFSET '+params.ids[2];
+                    }
+                }
+                else if(params.ids[3] == 'FEELING'){
+                                        
+                    // get the specific feeling details
+                    query = 'SELECT * FROM psych_emotions where feeling = "'+params.ids[4]+'"';
 
                 }
-                else {
-                    
-                    // get the feelings
-                    query = 'SELECT emotion,feeling,description,media FROM psych_emotions ORDER BY feeling ASC LIMIT 50 OFFSET '+params.ids[2];
-                }
-                
                 const [rows, fields] = await connection.execute(query);
                 connection.release();
 

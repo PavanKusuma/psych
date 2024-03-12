@@ -27,7 +27,7 @@ export async function GET(request,{params}) {
             // update the player Id for the user
             if(params.ids[1] == 'U1'){
                 try {
-                    const [rows, fields] = await connection.execute('UPDATE user SET gcm_regId ="'+params.ids[3]+'" where collegeId = "'+params.ids[2]+'"');
+                    const [rows, fields] = await connection.execute('UPDATE users SET gcm_regId ="'+params.ids[3]+'" where collegeId = "'+params.ids[2]+'"');
                     connection.release();
                     // return successful update
                     return Response.json({status: 200, message:'Updated!'}, {status: 200})
@@ -61,8 +61,8 @@ export async function GET(request,{params}) {
                 try {
                     // let q = 'SELECT * FROM user WHERE collegeId LIKE "%'+params.ids[2]+'%"';
                     // console.log(q);
-                    let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM user u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.collegeId LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
-                    // let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM user u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.profileUpdated=1 AND u.collegeId LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
+                    let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM users u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.collegeId LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
+                    // let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM users u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.profileUpdated=1 AND u.collegeId LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
                     const [rows, fields] = await connection.execute(q);
                     connection.release();
                     // return successful update
@@ -86,7 +86,7 @@ export async function GET(request,{params}) {
                 try {
                     // let q = 'SELECT * FROM user WHERE collegeId LIKE "%'+params.ids[2]+'%"';
                     // console.log(q);
-                    let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM user u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.profileUpdated=1 AND u.username LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
+                    let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM users u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.profileUpdated=1 AND u.username LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
                     const [rows, fields] = await connection.execute(q);
                     connection.release();
                     // return successful update
@@ -158,9 +158,9 @@ export async function GET(request,{params}) {
             // only used for student registration purpose
             else if(params.ids[1] == 'U6'){
                 try {
-                    // let q = 'SELECT * FROM user WHERE collegeId LIKE "%'+params.ids[2]+'%"';
+                    // let q = 'SELECT * FROM users WHERE collegeId LIKE "%'+params.ids[2]+'%"';
                     // console.log(q);
-                    let q = 'SELECT * FROM user WHERE role = "Student" AND profileUpdated=0 AND collegeId = "'+params.ids[2]+'" LIMIT 1 OFFSET '+params.ids[3];
+                    let q = 'SELECT * FROM users WHERE role = "Student" AND profileUpdated=0 AND collegeId = "'+params.ids[2]+'" LIMIT 1 OFFSET '+params.ids[3];
                     const [rows, fields] = await connection.execute(q);
                     connection.release();
                     // return successful update
@@ -183,12 +183,12 @@ export async function GET(request,{params}) {
             // this is to check and update during student registration
             else if(params.ids[1] == 'U7'){
                 try {
-                    // let q = 'SELECT * FROM user WHERE collegeId LIKE "%'+params.ids[2]+'%"';
+                    // let q = 'SELECT * FROM users WHERE collegeId LIKE "%'+params.ids[2]+'%"';
                     // console.log(params.ids[2]);
                     
                     let i = "https://firebasestorage.googleapis.com/v0/b/smartcampusimages-1.appspot.com/o/"+params.ids[2]+".jpeg?alt=media";
 
-                    let q = `UPDATE user SET mediaCount = 1, userImage = '${i}' WHERE collegeId = '${params.ids[2]}'`;
+                    let q = `UPDATE users SET mediaCount = 1, userImage = '${i}' WHERE collegeId = '${params.ids[2]}'`;
                     const [rows, fields] = await connection.execute(q);
                     connection.release();
                     // return successful update
@@ -214,13 +214,13 @@ export async function GET(request,{params}) {
                     //  FROM user 
                     //  WHERE mediaCount = 1 AND profileUpdated = 0) AS user_count FROM user WHERE mediaCount = 1 AND profileUpdated = 0 LIMIT 10 OFFSET `+params.ids[2];
                     let q1 = `SELECT COUNT(*) AS registered
-                     FROM user 
+                     FROM users 
                      WHERE profileUpdated = 0`;
                     let q2 = `SELECT COUNT(*) AS user_count
-                    FROM user 
+                    FROM users 
                     WHERE mediaCount = 1 AND profileUpdated = 0`;
                     let q3 = `SELECT *
-                     FROM user 
+                     FROM users 
                      WHERE (mediaCount = 1 OR mediaCount = 0) AND profileUpdated = 0 ORDER BY (mediaCount = 1) DESC, CAST(userObjectId AS SIGNED) ASC `;
                     //  WHERE (mediaCount = 1 OR mediaCount = 0) AND profileUpdated = 0 ORDER BY (mediaCount = 1) DESC, CAST(userObjectId AS SIGNED) ASC LIMIT 10 OFFSET `+params.ids[2];
                     
@@ -267,8 +267,8 @@ export async function GET(request,{params}) {
                         }
                       }
                       
-                    console.log(`UPDATE user SET ${updateString} WHERE collegeId = '${params.ids[2]}'`);
-                    let q = `UPDATE user SET ${updateString} WHERE collegeId = '${params.ids[2]}'`;
+                    console.log(`UPDATE users SET ${updateString} WHERE collegeId = '${params.ids[2]}'`);
+                    let q = `UPDATE users SET ${updateString} WHERE collegeId = '${params.ids[2]}'`;
                     
                     const [rows, fields] = await connection.execute(q);
                     connection.release();
@@ -440,10 +440,10 @@ export async function GET(request,{params}) {
                         }
                       }
                       
-                    console.log(`INSERT INTO user (${userKeys}) VALUES (${userValues})`);
-                    console.log(`INSERT INTO user (${userDetailKeys}) VALUES (${userDetailValues})`);
+                    console.log(`INSERT INTO users (${userKeys}) VALUES (${userValues})`);
+                    console.log(`INSERT INTO users (${userDetailKeys}) VALUES (${userDetailValues})`);
 
-                    let p = `INSERT INTO user (${userKeys}) VALUES (${userValues})`;
+                    let p = `INSERT INTO users (${userKeys}) VALUES (${userValues})`;
                     let q = `INSERT INTO user_details (${userDetailKeys}) VALUES (${userDetailValues})`;
                     
                     const [rows, fields] = await connection.execute(p);
@@ -469,7 +469,7 @@ export async function GET(request,{params}) {
             // this is requested by the user itself to refresh their profile after update by admin
             else if(params.ids[1] == 'U12'){
                 try {
-                    const [rows, fields] = await connection.execute('SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM user u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.collegeId = "'+params.ids[2]+'"');
+                    const [rows, fields] = await connection.execute('SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM users u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.collegeId = "'+params.ids[2]+'"');
                     connection.release();
                     // return successful update
 
@@ -501,8 +501,8 @@ export async function GET(request,{params}) {
                 try {
                     let type = decodeURIComponent(params.ids[4]);
                     
-                    const [rows, fields] = await connection.execute('UPDATE user SET profileUpdated ="'+params.ids[3]+'", type = "'+type+'" where collegeId = "'+params.ids[2]+'"');
-                    const [rows2, fields2] = await connection.execute('SELECT gcm_regId FROM user WHERE collegeId = "'+params.ids[2]+'"');
+                    const [rows, fields] = await connection.execute('UPDATE users SET profileUpdated ="'+params.ids[3]+'", type = "'+type+'" where collegeId = "'+params.ids[2]+'"');
+                    const [rows2, fields2] = await connection.execute('SELECT gcm_regId FROM users WHERE collegeId = "'+params.ids[2]+'"');
 
                     // send the notification
                     const notificationResult = await send_notification('✅ Your profile is updated by admin. Refresh profile to view.', rows2[0].gcm_regId, 'Single');
@@ -521,8 +521,8 @@ export async function GET(request,{params}) {
             // no - not self-permitted
             else if(params.ids[1] == 'U14'){
                 try {
-                    const [rows, fields] = await connection.execute('UPDATE user SET outingType ="'+params.ids[3]+'" where collegeId = "'+params.ids[2]+'"');
-                    const [rows2, fields2] = await connection.execute('SELECT gcm_regId FROM user WHERE collegeId = "'+params.ids[2]+'"');
+                    const [rows, fields] = await connection.execute('UPDATE users SET outingType ="'+params.ids[3]+'" where collegeId = "'+params.ids[2]+'"');
+                    const [rows2, fields2] = await connection.execute('SELECT gcm_regId FROM users WHERE collegeId = "'+params.ids[2]+'"');
 
                     // send the notification
                     const notificationResult = await send_notification('✅ Your outing type is changed by admin. Refresh profile to view.', rows2[0].gcm_regId, 'Single');
@@ -538,7 +538,7 @@ export async function GET(request,{params}) {
             // Change the phoneNumber
             else if(params.ids[1] == 'U15'){
                 try {
-                    const [rows, fields] = await connection.execute('UPDATE user SET phoneNumber ="'+params.ids[3]+'" where collegeId = "'+params.ids[2]+'"');
+                    const [rows, fields] = await connection.execute('UPDATE users SET phoneNumber ="'+params.ids[3]+'" where collegeId = "'+params.ids[2]+'"');
                     connection.release();
                     // return successful update
                     return Response.json({status: 200, message:'Phone number updated!'}, {status: 200})
@@ -552,8 +552,8 @@ export async function GET(request,{params}) {
                     // let q = 'SELECT * FROM user WHERE collegeId LIKE "%'+params.ids[2]+'%"';
                     // console.log(q);
                     
-                    let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM user u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND (u.phoneNumber LIKE "%'+params.ids[2]+'%" OR d.fatherPhoneNumber LIKE "%'+params.ids[2]+'%" OR d.motherPhoneNumber LIKE "%'+params.ids[2]+'%" OR d.guardianPhoneNumber LIKE "%'+params.ids[2]+'%" OR d.guardian2PhoneNumber LIKE "%'+params.ids[2]+'%") LIMIT 20 OFFSET '+params.ids[3];
-                    // let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM user u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.profileUpdated=1 AND u.collegeId LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
+                    let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM users u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND (u.phoneNumber LIKE "%'+params.ids[2]+'%" OR d.fatherPhoneNumber LIKE "%'+params.ids[2]+'%" OR d.motherPhoneNumber LIKE "%'+params.ids[2]+'%" OR d.guardianPhoneNumber LIKE "%'+params.ids[2]+'%" OR d.guardian2PhoneNumber LIKE "%'+params.ids[2]+'%") LIMIT 20 OFFSET '+params.ids[3];
+                    // let q = 'SELECT u.*, IFNULL(d.fatherName, "") AS fatherName, IFNULL(d.fatherPhoneNumber, "") AS fatherPhoneNumber, IFNULL(d.motherName, "") AS motherName, IFNULL(d.motherPhoneNumber, "") AS motherPhoneNumber, IFNULL(d.address, "") AS address, IFNULL(d.guardianName, "") AS guardianName, IFNULL(d.guardianPhoneNumber, "") AS guardianPhoneNumber, IFNULL(d.guardian2Name, "") AS guardian2Name, IFNULL(d.guardian2PhoneNumber, "") AS guardian2PhoneNumber, IFNULL(d.hostelId, "") AS hostelId, IFNULL(d.roomNumber, "") AS roomNumber, IFNULL(h.hostelName, "") AS hostelName FROM users u LEFT JOIN user_details d ON u.collegeId = d.collegeId LEFT JOIN `hostel` h ON d.hostelId = h.hostelId WHERE u.role = "Student" AND u.profileUpdated=1 AND u.collegeId LIKE "%'+params.ids[2]+'%" LIMIT 20 OFFSET '+params.ids[3];
                     const [rows, fields] = await connection.execute(q);
                     connection.release();
                     // return successful update

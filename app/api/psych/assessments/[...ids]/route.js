@@ -68,8 +68,15 @@ export async function GET(request,{params}) {
 
                     let query = '';
                     // check what type of requests to be shown
+
+                    if(params.ids[2] == 'All'){
+                        query = 'SELECT * FROM psych_assessments ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
+                    }
+                    else {
+                        query = 'SELECT * FROM psych_assessments where campusId = "'+params.ids[2]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
+                    }
                     
-                    query = 'SELECT * FROM psych_assessments ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
+                    console.log(query);
                     const [rows, fields] = await connection.execute(query);
                     connection.release();
 

@@ -1,5 +1,5 @@
-import pool from '../../../db'
-import { Keyverify } from '../../../secretverify';
+import pool from '../../../../db'
+import { Keyverify } from '../../../../secretverify';
 import dayjs from 'dayjs'
 
 // S1 ADMIN ––––– get the appointments that are unassigned and assigned by campus by duration
@@ -60,24 +60,18 @@ export async function GET(request,{params}) {
                     if(params.ids[2] == 'S1'){
 
                         // get the unassigned appointments by campus
-                        var query1 = '';
-                        var query2 = '';
-                        if(params.ids[6] == 'All'){
-                            query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "Submitted" AND isOpen = 1 ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                        var query1 = '', query2 = '';
+                        if(params.ids[6] == 'All'){ // check if we need to call all campuses data or specific campus
+                            query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                             // get the assigned appointments by campus
                             query2 = 'SELECT * FROM psych_appointment WHERE adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
                         }
                         else {
-                            query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "Submitted" AND campusId = "'+params.ids[6]+'" AND isOpen = 1 ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                        // get the assigned appointments by campus
-                        query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" AND campusId = "'+params.ids[6]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            // get the assigned appointments by campus
+                            query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                         }
-                        // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "Submitted" AND campusId = "'+params.ids[6]+'" AND isOpen = 1 ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                        // // get the assigned appointments by campus
-                        // query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-console.log(query1);
-console.log(query2);
-
+                    
                         const [rows1, fields1] = await connection.execute(query1);
                         const [rows2, fields2] = await connection.execute(query2);
                         connection.release();

@@ -1,7 +1,11 @@
 'use client'
-import { Inter } from 'next/font/google'
+import { Inter, DM_Sans, DM_Serif_Text } from 'next/font/google'
+const inter = Inter({ subsets: ['latin'] })
+const dmSans = DM_Sans({ subsets: ['latin'] })
+const dmSerifText = DM_Serif_Text({weight: "400", subsets: ['latin'] })
+
 import styles from '../../../app/page.module.css'
-import { Monitor, UserFocus, ArrowSquareOut, PresentationChart, IdentificationBadge, CalendarCheck, UserPlus, FileImage, PersonSimpleRun } from 'phosphor-react'
+import { Monitor, UserFocus, ArrowSquareOut, PresentationChart, IdentificationBadge, CalendarCheck, UserPlus, FileImage, PersonSimpleRun, Calendar, PenNib } from 'phosphor-react'
 
 import Biscuits from 'universal-cookie'
 const biscuits = new Biscuits
@@ -9,7 +13,6 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react';
 import { Toaster } from "@/app/components/ui/toaster"
 
-const inter = Inter({ subsets: ['latin'] })
 
 // export const metadata = {
 //     title: 'Dashboard',
@@ -108,6 +111,16 @@ const inter = Inter({ subsets: ['latin'] })
       setSelectedTab('Chat')
       router.push('/student360/search')
     }
+    function navigateAppointments(){
+      // biscuits.set('selectedTab', 'Chat', {path: '/', expires: new Date(Date.now() + 10800000)})
+      setSelectedTab('Appointments')
+      router.push('/appointments')
+    }
+    function navigateAssessments(){
+      // biscuits.set('selectedTab', 'Chat', {path: '/', expires: new Date(Date.now() + 10800000)})
+      setSelectedTab('Assessments')
+      router.push('/assessments')
+    }
     
 
     return (
@@ -115,11 +128,11 @@ const inter = Inter({ subsets: ['latin'] })
 
         <div className={styles.main}>
           
-        <div className={inter.className}>
+        <div className={dmSerifText.className}>
           <div className={styles.topbar} style={{height:'6vh'}}>
             <div className={styles.horizontalsection}>
               {/* <Image src="/sc_logo1.svg" alt="Smart Campus" width={160} height={40} priority /> */}
-              <span className="hidden font-bold sm:inline-block">Trust Vishnu</span>
+              <span className="hidden sm:inline-block">Dear Me</span>
               
               {/* <span style={{color: '#CCCCCC'}}>|</span> */}
               {/* <Image src="/svecw_sc_logo.svg" alt="Smart Campus" width={90} height={40} priority /> */}
@@ -145,7 +158,8 @@ const inter = Inter({ subsets: ['latin'] })
               <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
                 <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Dashboard' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateDashboard.bind(this)} style={{cursor:'pointer'}}><Monitor className={styles.menuicon}/> Dashboard</div>
                 <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Chat' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateStudents.bind(this)} style={{cursor:'pointer'}}><UserFocus className={styles.menuicon}/> Chat</div>
-                {/* <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Outing' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateOuting.bind(this)} style={{cursor:'pointer'}}><PersonSimpleRun className={styles.menuicon}/> Outing</div> */}
+                <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Appointments' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateAppointments.bind(this)} style={{cursor:'pointer'}}><Calendar className={styles.menuicon}/> Appointments</div>
+                <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Assessments' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateAssessments.bind(this)} style={{cursor:'pointer'}}><PenNib className={styles.menuicon}/> Assessments</div>
                 {/* <div className={`${styles.horizontalsection} ${inter.className} ${styles.text2}`} style={{cursor:'pointer'}}><ArrowSquareOut className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Outing</div>
                 <div className={`${styles.horizontalsection} ${inter.className} ${styles.text2}`} style={{cursor:'pointer'}}><PresentationChart className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Reports</div> */}
                 {/* <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Registration' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateRegistration.bind(this)} style={{cursor:'pointer'}}><UserPlus className={styles.menuicon}/> Registration</div> */}

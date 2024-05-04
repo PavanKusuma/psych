@@ -616,9 +616,9 @@
 }
 
 .icon {
-    width: 16px;
-    height: 16px;
-    color: #999999;
+    width: 20px;
+    height: 20px;
+    color: #0074de;
     /* padding: 8px; */
     /* cursor: pointer; */
 }
@@ -636,7 +636,7 @@
 }
 
 .load {
-  animation: 6s rotate linear infinite;
+  animation: 0.75s rotate linear infinite;
 }
 .code {
   font-weight: 700;

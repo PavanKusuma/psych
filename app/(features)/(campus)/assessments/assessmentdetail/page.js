@@ -1,7 +1,7 @@
 'use client'
 
 
-import Dashboard from '../../(features)/(campus)/dashboard/page'
+import Dashboard from '../../dashboard/page'
 import { Inter, DM_Sans, DM_Serif_Text } from 'next/font/google'
 import { SpinnerGap } from 'phosphor-react'
 import { useEffect, useState } from 'react'
@@ -9,13 +9,13 @@ const inter = Inter({ subsets: ['latin'] })
 const dmSans = DM_Sans({ subsets: ['latin'] })
 const dmSerifText = DM_Serif_Text({weight: "400", subsets: ['latin'] })
 import Biscuits from 'universal-cookie'
-import styles from '../../page.module.css'
+import styles from '../../../../app/page.module.css'
 import { useRouter } from 'next/navigation'
 const biscuits = new Biscuits
 import dayjs from 'dayjs'
 import Toast from './toast';
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
+import { Button } from "@/app/components/ui/button"
+import { Input } from "@/app/components/ui/input"
 
 // declare the apis of this page
   const verifyUser = async (pass, id, otp) => 
@@ -38,7 +38,7 @@ import { Input } from '../ui/input'
 // If the user is found in the database, OTP will be sent for the user mobile number based on the user type
 // incase parent is logging in on behalf of student, the OTP is sent to parent's number
 // After verification, data is saved in local storage
-export default function Vertification() {
+export default function AssessmentDetail() {
     
     // create a router for auto navigation
     const router = useRouter();

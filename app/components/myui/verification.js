@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 import Toast from './toast';
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import Link from 'next/link'
 
 // declare the apis of this page
   const verifyUser = async (pass, id, otp) => 
@@ -448,7 +449,12 @@ function verifyOTP(){
             
             {(resultMessage.length > 0) ? <Toast type={resultType} message={resultMessage} /> : ''}
 
-            <p><span className={`${dmSans.className} ${styles.text2}`}>Privacy</span></p>
+            <div className={`${dmSans.className} ${styles.text2}`}>
+                <Link href={{pathname: '/privacy',}} 
+                      className="underline text-slate-700">Privacy</Link>
+                <Link href={{pathname: '/other',}} 
+                      className="underline text-slate-700">Terms</Link>
+            </div>
 
             </div>
         </div>

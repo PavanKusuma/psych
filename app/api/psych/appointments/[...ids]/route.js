@@ -60,8 +60,6 @@ export async function GET(request,{params}) {
                     if(params.ids[2] == 'S1'){
 
                         // get the unassigned appointments by campus
-                        var query1 = '';
-                        var query2 = '';
                         if(params.ids[6] == 'All'){
                             query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "Submitted" AND isOpen = 1 ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                             // get the assigned appointments by campus

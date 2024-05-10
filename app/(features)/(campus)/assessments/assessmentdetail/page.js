@@ -270,9 +270,9 @@ function downloadNow(resultId) {
         }
         
         <div className={`${inter.className}`} style={{display:'flex',flexDirection:'row',justifyContent:'space-between', width:'100%', alignItems: 'start',gap:'8px'}}>
-            {allResults.map(result => (
-            
-            <Card className="w-[350px]">
+            {/* {allResults.map(result => ( */}
+            {allResults.map((result, dayIndex) => (
+            <Card key={dayIndex} className="w-[350px]">
                 <CardHeader>
                 {(allResults.length == 0) ? <div className={styles.horizontalsection}>
                                     <SpinnerGap className={`${styles.icon} ${styles.load}`} />

@@ -1,55 +1,75 @@
 'use client'
 
 
-import Dashboard from '../../dashboard/page'
+
 import { Inter, DM_Sans, DM_Serif_Text } from 'next/font/google'
-import { SpinnerGap } from 'phosphor-react'
+import { ArrowDown, ArrowLeft, SpinnerGap } from 'phosphor-react'
 import { useEffect, useState } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 const dmSans = DM_Sans({ subsets: ['latin'] })
 const dmSerifText = DM_Serif_Text({weight: "400", subsets: ['latin'] })
 import Biscuits from 'universal-cookie'
-import styles from '../../../../app/page.module.css'
+import styles from '../../../../../app/page.module.css'
 import { useRouter } from 'next/navigation'
 const biscuits = new Biscuits
 import dayjs from 'dayjs'
-import Toast from './toast';
+import Toast from '../../../../components/myui/toast';
 import { Button } from "@/app/components/ui/button"
+import { Table, TableHead, TableRow, TableCell, TableBody } from "@/app/components/ui/table"
 import { Input } from "@/app/components/ui/input"
+import { Label } from "@/app/components/ui/label"
+import {Card,CardContent,CardDescription,CardFooter,CardHeader,CardTitle,} from "@/app/components/ui/card"
+import { Skeleton } from "@/app/components/ui/skeleton"
+const xlsx = require('xlsx');
 
-// declare the apis of this page
-  const verifyUser = async (pass, id, otp) => 
+// get the appointments for PsychAdmin
+const getAllAppointmentsDataAPI = async (pass, role, campusId, offset) => 
   
-    fetch("/api/verify/"+pass+"/"+id+"/"+otp+"/"+generateDeviceID()+"/PSYCH/"+dayjs(new Date(Date.now())).format('YYYY-MM-DD HH:mm:ss'), {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-    });
-   
-    // Function to generate a random string
-    function generateDeviceID() {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    }
+fetch("/api/psych/assessments/"+pass+"/"+role+"/2/"+campusId+"/"+offset, {
+    method: "GET",
+    headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+    },
+});
 
+
+// get the appointments for PsychAdmin
+const getStudentsDataAPI = async (pass, role, students) => 
+  
+fetch("/api/psych/assessments/"+pass+"/"+role+"/3/"+students, {
+    method: "GET",
+    headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+    },
+});
 // verification using college Id
 // In future, based on the type of the user verification can be succeded
 // If the user is found in the database, OTP will be sent for the user mobile number based on the user type
 // incase parent is logging in on behalf of student, the OTP is sent to parent's number
 // After verification, data is saved in local storage
-export default function AssessmentDetail() {
+export default function AssessmentDetail({ searchParams}) {
     
     // create a router for auto navigation
     const router = useRouter();
+      console.log(searchParams.id);
+      console.log(searchParams.title);
+      console.log(searchParams.type);
         
     // session variable to track login
     const [session, setSession] = useState(false);
-
+    // var finalData = [];
+    const [finalData, setFinalData] = useState([]);
+    const [allAnswers, setAllAnswers] = useState([]);
+    const [allResults, setAllResults] = useState([]);
+    const [assessmentId, setAssessmentId] = useState(searchParams.id);
+    const [assessmentTitle, setAssessmentTitle] = useState(searchParams.title);
+    const [assessmentType, setAssessmentType] = useState(searchParams.type);
     const [username, setUsername] = useState('');
-    const [phone, setPhone] = useState('');
+    const [offset, setOffset] = useState(0);
     const [email, setEmail] = useState('');
-    const [userFound, setuserFound] = useState(false);
+    const [downloading, setDownloading] = useState(false);
     const [errorMsg, seterrorMsg] = useState('');
 
     const [otpSent, setotpSent] = useState(false);
@@ -63,392 +83,398 @@ export default function AssessmentDetail() {
     const [queryResult, setQueryResult] = useState(); 
     const [resultType, setResultType] = useState('');
     const [resultMessage, setResultMessage] = useState('');
+    //create new date object
+    const today = new dayjs();
 
     useEffect(()=>{
+        
+    
         // Retrieve the cookie
         let cookieValue = biscuits.get('sc_user_detail')
         // let cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)sc_user_detail\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         if(cookieValue){
             const obj = JSON.parse(decodeURIComponent(cookieValue))
             
-            // for now, only admins can login in to this portal
-            if(obj.role == 'PsychAdmin')
-            {
-                setSession(true)
-                // router.push('/dashboard')
-                router.push('/dashboard')
-            }
-            else if(obj.role == 'Student' || obj.role == 'student'){
-                setSession(true)
-                // router.push('/dashboard')
-                router.push('/profileupdate')
-            }
-            else {
-
-            }
+            // get the details
+            getAssessmentDetails();
         }
         else{
-            setSession(false)
+            // setSession(false)
             // console.log('Not found')
         }
-    },[session]);
+    },[]);
  
-     // Function to handle the "Enter" key press
-     const handleKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            loginHere();
-        }
-    };
-    
-    // Function to handle the "Enter" key press
-     const handleOTPKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            verifyOTP();
-        }
-    };
 
-// verify the collegeId by calling the API
-async function loginHere(){
+    // verify the collegeId by calling the API
+    async function getAssessmentDetails(){
 
-    try{
-        // check for the input
-        if(document.getElementById('collegeId').value.length > 0){
+        try{
 
-            var otp = Math.floor(1000 + Math.random() * 9000);
-            setOTP(otp);
-            console.log(otp);
-
-            // show the loading.
-            setuserFound(true);
-            setotpSent(false);
-            
             // call the api using secret key and collegeId provided
-            const result  = await verifyUser(process.env.NEXT_PUBLIC_API_PASS, document.getElementById('collegeId').value, otp)
+            // console.log("/api/psych/assessments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/2/"+assessmentId+"/"+offset);
+            const result  = await getAllAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, assessmentId, offset, )
+            
             const resultData = await result.json() // get data
             setQueryResult(resultData); // store data
-            console.log(resultData);
+            // console.log(resultData);
             // check if query result status is 200
             // if 200, that means, user is found and OTP is sent
             if(resultData.status == 200) {
                 
                 // set the state variables with the user data
-                setUser(resultData.data)
-                setUsername(resultData.data.username)
-                setEmail(resultData.data.email)
-                setPhone(resultData.data.phoneNumber)
 
-                // save the data to local cookie
-                // let jsonString = JSON.stringify(queryResult.data)
-                // biscuits.set('sc_user_detail', encodeURIComponent(jsonString), {path: '/', expires: new Date(Date.now() + 300000)})
-                // document.cookie = "sc_user_detail="+encodeURIComponent(jsonString)+ "; expires=" + new Date(Date.now() + 300000).toUTCString() + "; path=/";
+                setAllAnswers(resultData.answers);
+                setAllResults(resultData.results);
 
-                // Retrieve the cookie
-                // let cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)sc_user_detail\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-                // let cookieValue = biscuits.get('sc_user_detail')
-                // const obj = JSON.parse(decodeURIComponent(cookieValue))
-                
-                // call the OTP api
-                // const otpResult = sendOTP()
+                resultData.results.forEach(result => {
 
-                // As OTP is already sent, show the OTP prompt text field
+                    // Step 2: Filter the array to know how many users took this assessment
+                    const users = resultData.answers.filter(answer => answer.resultId == result.resultId);
 
-                // for now, only allow if user is admin
-                if(resultData.data.role == 'PsychAdmin'){
-                    // otp sent
-                    setotpSent(true)
-                }
-                else if(resultData.data.role == 'Student' || resultData.data.role == 'student'){
-                    // otp sent
-                    setotpSent(true)
-                }
-                else {
-                    // block the user
-                    setuserFound(false);
-                    setotpSent(false);
-                    seterrorMsg('You do not have enough permissions to login. Contact your campus administrator.')
-                }
-                // if(true){
-                //     // otp sent
-                //     setotpSent(true)
-                // }
+                    // Step 3: Get the count of users who meet the condition
+                    const count = users.length;
+
+                });
             }
             else if(resultData.status == 404) {
 
                 seterrorMsg('No match found. Contact your campus administrator.')
-                setuserFound(false)
-                setinfoMsg(true) // show the big info message about reaching out
-                // otp sent
-                setotpSent(false)
+                // setuserFound(false)
+                // setinfoMsg(true) // show the big info message about reaching out
+                // // otp sent
+                // setotpSent(false)
             }
             
         }
-        else {
-            // show error incase of no input
-            seterrorMsg('Enter your college registered number')
+        catch(e){
+            
+            // show and hide message
+            setResultType('error');
+            setResultMessage('Error reaching server. Please try again later!');
+            setTimeout(function(){
+                setResultType('');
+                setResultMessage('');
+            }, 3000);
         }
     }
-    catch(e){
+
+function getUniqueStudentsCount(resultId){
+    const result = allAnswers.filter(answer => answer.resultId == resultId);
+    const uniqueCollegeIds = [...new Set(result.map(item => item.collegeId))];
+    return uniqueCollegeIds.length;
+}
+
+function downloadNow(resultId) {
+    
+    setDownloading(true);
+    const result = allAnswers.filter(answer => answer.resultId == resultId);
+
+    try {
+        const uniqueCollegeIds = [...new Set(result.map(item => item.collegeId))];
+        const commaSeparatedCollegeIds = uniqueCollegeIds.join(',');
         
-        setuserFound(false);
-        setotpSent(false);
-
-        // show and hide message
-        setResultType('error');
-        setResultMessage('Error reaching server. Please try again later!');
-        setTimeout(function(){
-            setResultType('');
-            setResultMessage('');
-        }, 3000);
+        // call for data
+        getStudentDetailsForDownload(commaSeparatedCollegeIds);
+        
+    } catch (error) {
+        console.error("Failed to process college IDs:", error);
     }
-}
-
-// clear cookies
-function clearCookies(){
-
-     // clear cookies
-    //  document.cookie = "";
-     biscuits.remove('sc_user_detail')
-
-     // clearing the state variable
-     setUsername(''),setPhone(''),setuserFound(false),seterrorMsg(''),setotpSent(false),setverifyOtpMsg(''),setOTP(),setinfoMsg(false),setUser()
-     
+    
 }
 
 
-// function sendOTP(){
-//     console.log("Phone : "+phone)
-//     if(phone.length > 0){
-  
-//       var val = Math.floor(1000 + Math.random() * 9000);
-//       console.log("OTP : "+val)
-//       // generate OTP
-//       setOTP(val)
-      
+    // get student details for download
+    async function getStudentDetailsForDownload(data){
 
-//       // call the API
+        try{
 
-//       // verify the result
-//         return true
+            // call the api using secret key and collegeId provided
+            // console.log("/api/psych/assessments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/"+data);
+            const result  = await getStudentsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, data, )
+            
+            const resultData = await result.json() // get data
+            setQueryResult(resultData); // store data
+            // console.log(resultData);
+            // check if query result status is 200
+            // if 200, that means, user is found and OTP is sent
+            if(resultData.status == 200) {
 
-//       // send OTP request
-//     //   fetch(withQuery('/api/user/sendotp', 
-//     //     {
-//     //         phoneNumber: this.state.phone,
-//     //         // phoneNumber: this.refs.phonenumber.value,
-//     //         otp: val,
-//     //     }),
-//     //     {
-//     //         method: 'GET',
-//     //         headers: {'Content-Type': 'application/json'},
-            
-//     //     })
-//     //   .then(res => res.json())
-//     //   .then(data => this.setState({data}, () => {
-//     //     // console.log(`Customers fetched`, data)
-//     //     // console.log(`Customers fetched`, this.state.otpNumber)
-//     //     // save new number
-//     //     cookies.set('phone', this.state.phone, {path: '/'})
-//     //     if(data.status == 200) {
-//     //       this.setState({otpMsg: 'OTP sent!', otpSent: true})
-//     //     }
-//     //     else {
-//     //       // retry sending OTP again
-//     //     }
-//     //   })
-//     // );
-  
-//     }
-//     else {
-//       return false
-//     }
-//   }
-  
-  
-function verifyOTP(){
-
-    // check for OTP input
-    if(document.getElementById('otp').value.length == 4){
-        // verify the otp
-        if(document.getElementById('otp').value == otp){
-           
-            setverifyOtpMsg('OTP verified! Redirecting you to dashboard...')
-            
-            // save the data to local cookie
-            let jsonString = JSON.stringify(queryResult.data)
-            biscuits.set('sc_user_detail', encodeURIComponent(jsonString), {path: '/', expires: new Date(Date.now() + 10800000)})
-            
-            // navigate to dashboard
-            // router.push('/dashboard')
-            
-            // for now navigate the students to update their profile specific images
-            if(queryResult.data.role == 'PsychAdmin')
-            {
-                router.push('/dashboard')
-            }
-            else if(queryResult.data.role == 'Student'){
+                const worksheet = xlsx.utils.json_to_sheet(resultData.data);
+                const workbook = xlsx.utils.book_new();
+                xlsx.utils.book_append_sheet(workbook,worksheet,'Students');
+                xlsx.writeFile(workbook, 'AssessmentResult_'+assessmentTitle+'_'+dayjs((today).toDate()).format("DD-MM-YYYY").toString()+'.xlsx');
                 
-                // router.push('/')
-                setverifyOtpMsg('We only provide experience on the mobile app for students')
+                setDownloading(false);
             }
-        }
-        else{
-            setverifyOtpMsg('Invalid OTP!')
-        }
-    }
-    else {
-        // show error message
-        setverifyOtpMsg('Enter OTP to proceed')
-    }
-    // if(this.refs.otp.value.length == 4){
-  
-    //   // verify OTP value
-    //   // if(this.refs.otp.value == this.state.otpNumber){
-    //   if(true){
-        
-    //     this.setState({verifyOtpMsg: 'Your mobile is verified! Redirecting you to dashboard...', otpVerify: true})
-  
-    //     // delay the navigation
-    //     setTimeout(function() { //Start the timer
-  
-    //       // navigate to home
-    //       this.props.history.push('/home')
-  
-    //     }.bind(this), 500)
-  
-        
-    //   }
-    //   else {
-    //     this.setState({verifyOtpMsg: 'Invalid OTP!'})  
-    //   }
-  
-    // }
-    // else {
-    //   this.setState({verifyOtpMsg: 'Enter OTP sent to your mobile'})
-    // }
-  }
+            else if(resultData.status == 404) {
 
+                setDownloading(false);
+                seterrorMsg('No match found. Contact your campus administrator.')
+            }
+            
+        }
+        catch(e){
+            
+            // show and hide message
+            setDownloading(false);
+            setResultType('error');
+            setResultMessage('Error reaching server. Please try again later!');
+            setTimeout(function(){
+                setResultType('');
+                setResultMessage('');
+            }, 3000);
+        }
+    }
   
   return (
-    // based on the available list, show the Load more CTA 
-
     
-    <div>
-        
-        {(session) ? 
-        //   <Registration />
-          <Dashboard />
-          :
-        <div className={styles.titlecard}>
-            <div className={styles.section_one}>
-            {/* <div >
-                <img src="/sc_logo2.png" style={{height:'80px', width:'80px', float:'left'}}/>
-            </div> */}
-            <br/>
-            <h1 className={`${dmSerifText.className}`} >Dear Me</h1>
-            {/* <div >
-                <img src="/svecw_sc_logo.svg" style={{height:'46px', width:'220px', float:'left'}}/>
-            </div> */}
+    <div className={styles.verticalsection} style={{height:'100vh',gap:'16px'}}>
+        <Button variant="secondary" onClick={() => router.back()} style={{marginTop: '16px'}}> <ArrowLeft className="mr-2 h-4 w-4"/> Back</Button>
+        <div className={dmSans.className} style={{display:'flex',flexDirection:'column',justifyContent:'space-around', marginTop:'12px'}}>
             
-            <br/>
-            {/* prompt the user for college Id
-            and verify if it exists in the sytem */}
-            <div>
-                {(!userFound) ?
-                <div className={styles.card_block1}>
+            <div className={styles.horizontalsection}>
+                <h1 className="text-3xl font-bold leading-normal">Assessment Results</h1>
+                {(allResults.length == 0) ? <SpinnerGap className={`${styles.icon} ${styles.load}`} /> : ''}
+            </div>
+            {/* <p className="text-sm text-slate-500">Students will be in any of below result set once assessment is taken by them.</p> */}
             
-                    <p className={`${inter.className} ${styles.text2}`}>Your college registered Id </p><br/>
-                    {/* <input id="collegeId" className={`${inter.className} ${styles.text2} ${styles.textInput}`} placeholder="" onKeyDown={handleKeyPress}/> */}
-                    <Input id="collegeId" placeholder="" onKeyDown={handleKeyPress}/>
-                    <br/>
-                    <Button id="submit" onClick={loginHere.bind(this)}>Sign in</Button>
-                    {/* <button id="submit" onClick={loginHere.bind(this)} className={`${inter.className} ${styles.text2} ${styles.primarybtn}`}>Sign in</button> */}
-                    <br/>
-                    <br/>
-                        {(errorMsg.length > 0) ? 
-                            
-                            <div className={`${styles.error} ${inter.className} ${styles.text2}`}>{errorMsg}</div>
-                            :''}
-                        
-                    <br/>
-                    
-                    {(infoMsg) ?
-                    <div className={infoMsg ? '':'styles.hidden'}>
-                        <div className={`${inter.className} ${styles.text2}`}>
-                            <br/>We couldnot find you in our system for any of below reasons:<br/>
-                            <ul style={{listStyle:'none'}}>
-                                <li>1. Your college Id might be incorrect.</li>
-                                <li>2. Your college is not registered with Smart Campus yet</li>
-                            </ul>  
-                        </div>
-                        <br/>
-                        <p className={`${inter.className} ${styles.text3}`}>Please contact your college administration or drop a mail with your campus name to <a href="mailto:hello.helpmecode@gmail.com"  className={styles.information}>hello.helpmecode@gmail.com</a></p>
-                        <br/>
-                    </div>
-                    :
-                    ''}
-                    
-                    <div>
-                        <p className={`${inter.className} ${styles.text3}`}>No account? <a href="/signup"  className={styles.secondarybtn}>Join now</a></p>
-                    </div>
-                    
-                </div>
-                :
-                ''
-                }
-            </div>
-
-           
-           {/* Show the OTP sending status while api is called */}
-            <div>
-                {(userFound && !otpSent) ?
-                <div className={styles.card_block1}>
-                    <div className={styles.horizontalsection}>
-                        {/* <Loader className={`${styles.icon} ${styles.load}`} /> */}
-                        <SpinnerGap className={`${styles.icon} ${styles.load}`} />
-                        <p className={`${inter.className} ${styles.text3}`}>Sending OTP ...</p> 
-                        {/* <p className={`${inter.className} ${styles.text3}`}>Sending OTP to {username}...</p>  */}
-                    </div>
-                </div>
-                :''}
-            </div>
-
-
-            {/* Prompt the user to enter the OTP */}
-            <div>
-                {(otpSent) ?
-                <div className={styles.card_block1}>
-                    <p className={`${inter.className} ${styles.text3}`}>Verify your mobile</p>
-                    <p className={`${inter.className} ${styles.text2}`}>Please enter the verification code sent to {email.slice(0, 4).padEnd(email.length, '*')}</p>
-                    {/* {phone.slice(0, 4).padEnd(phone.length, '*')} or  */}
-                    <br/>
-                    <input id="otp" className={`${styles.input_one} ${inter.className} ${styles.text3}`} placeholder="OTP" maxLength="4" style={{letterSpacing:30}}  onKeyDown={handleOTPKeyPress}/>
-                    <br/>
-                    <br/>
-                    {/* <button onClick={clearCookies.bind(this)} className={`${inter.className} ${styles.secondarybtn}`}>back</button> &nbsp;&nbsp; */}
-                    {/* <button onClick={verifyOTP.bind(this)} className={`${inter.className} ${styles.primarybtn}`} >Verify OTP</button> */}
-                    <Button onClick={clearCookies.bind(this)} variant="secondary">Back</Button> &nbsp;&nbsp;
-                    <Button onClick={verifyOTP.bind(this)}>Verify OTP</Button>
-                    <div>
-                        {(verifyOtpMsg.length) > 0 ?
-                        <div>
-                            <br/><br/>
-                            <span className={`${inter.className} ${styles.text2}`}>{verifyOtpMsg}</span>
-                        </div>
-                        :''}
-                    </div>
-                </div>
-                :''}
-            </div>
-            
-            
-            {(resultMessage.length > 0) ? <Toast type={resultType} message={resultMessage} /> : ''}
-
-            </div>
+        </div>     
+      
+        <div className={styles.horizontalsection}>
+            <Card className="w-[350px]">
+                <CardHeader>
+                {(allResults.length == 0) ? <div className={styles.horizontalsection}>
+                                    <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                                    <Skeleton className="h-4 w-[250px]" />
+                                </div> : ''}
+                    <CardTitle>Total times taken</CardTitle>
+                    <CardDescription className='text-xl'>{allAnswers.length}</CardDescription>
+                </CardHeader>
+            </Card>
+            <Card className="w-[350px]">
+                <CardHeader>
+                {(allResults.length == 0) ? <div className={styles.horizontalsection}>
+                                    <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                                    <Skeleton className="h-4 w-[250px]" />
+                                </div> : ''}
+                    <CardTitle>Total students taken</CardTitle>
+                    <CardDescription className='text-xl'>{allResults.length}</CardDescription>
+                </CardHeader>
+            </Card>
         </div>
-     } 
-    <br/>
+
+     
+        {(assessmentType == 1) ? 
+            <div>The evaluation of this assessment is based on {allResults.length} categories</div>
+            : <div>This assessment's evaluation is based on {allResults.length} ranges</div>
+        }
+        
+        <div className={`${inter.className}`} style={{display:'flex',flexDirection:'row',justifyContent:'space-between', width:'100%', alignItems: 'start',gap:'8px'}}>
+            {allResults.map(result => (
+            
+            <Card className="w-[350px]">
+                <CardHeader>
+                {(allResults.length == 0) ? <div className={styles.horizontalsection}>
+                                    <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                                    <Skeleton className="h-4 w-[250px]" />
+                                </div> : ''}
+                    <CardTitle>{result.title}</CardTitle>
+                    <CardDescription className='text-base'>
+                        Result range: {result.result}<br/>
+                        Students attempted: {getUniqueStudentsCount(result.resultId)}
+                    </CardDescription>
+                    <br/>
+                    <Button variant="outline" onClick={()=>downloadNow(result.resultId)}> <ArrowDown className="mr-2 h-4 w-4"/> Download</Button>
+                </CardHeader>
+            </Card>
+            
+                            // <div className={`${inter.className}`} key={result.resultId} style={{display:'flex',flexDirection:'column',alignItems: 'start',gap:'8px', borderLeft: '4px solid #0088FE',padding: '4px 12px'}}>
+                                
+                            //     {(allResults.length == 0) ? <div className={styles.horizontalsection}>
+                            //         <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                            //         <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
+                            //     </div> : ''}
+                            //     <div className='flex flex-row gap-0'><p className={`${inter.className} ${styles.text3}`} style={{width:'100px'}}>Range: </p><p className={`${inter.className} ${styles.text1}`} style={{width:'100px'}}>{result.result}</p></div>
+                            //     <div className='flex flex-row gap-0'><p className={`${inter.className} ${styles.text3}`} style={{width:'100px'}}>Result: </p><p className={`${inter.className} ${styles.text1}`} style={{width:'200px'}}>{result.title}</p></div>
+                            //     <div className='flex flex-row gap-0'><p className={`${inter.className} ${styles.text3}`} style={{width:'100px'}}>Attempts: </p><p className={`${inter.className} ${styles.text1}`} style={{width:'100px'}}>{allAnswers.filter(answer => answer.resultId == result.resultId).length}</p></div>
+                            //     <div className='flex flex-row gap-0'><p className={`${inter.className} ${styles.text3}`} style={{width:'100px', paddingBottom: '12px'}}>Students attempted: </p><p className={`${inter.className} ${styles.text1}`} style={{width:'100px'}}>{getUniqueStudentsCount(result.resultId)}</p></div>
+                                
+                            //     {/* <Button variant="outline"> <ArrowDown className="mr-2 h-4 w-4"/> Download</Button> */}
+                            //     <Button variant="outline" onClick={()=>downloadNow(result.resultId)}> <ArrowDown className="mr-2 h-4 w-4"/> Download</Button>
+                            // </div>
+                      
+        ))}
+        </div>
+        
+        {downloading ? 
+        <div className={styles.horizontalsection} style={{width:'100%',backgroundColor:'forestgreen',borderRadius:'4px',padding: '8px 12px'}}>
+            <SpinnerGap className={`${styles.icon} ${styles.load}`} style={{color: 'white'}}/>
+            <p className={`${inter.className} ${styles.text3}`} style={{color: 'white'}}>Downloading ...</p> 
+        </div> : ''}
+        
+      
+        {/* <div style={{width:'100%',display:'flex', flexDirection:'row',justifyContent:'space-between'}}>
+            <div className={styles.horizontalsection}>
+            <Button  onClick={getDataData}>
+              <Plus className="mr-2 h-4 w-4" /> Declare outing
+            </Button>
+                <div className={`${styles.primarybtn} `} style={{display:'flex', flexDirection:'row', width:'fit-content', cursor:'pointer', gap:'4px'}} onClick={toggleShowBlockOuting}> 
+                    <Plus />
+                    <p className={`${inter.className}`}>Declare outing</p>
+                </div> */}
+                {/* <BlockDatesBtn titleDialog={false} /> */}
+                {/* <OutingRequest /> */}
+                {/* <div className={`${styles.overlayBackground} ${showBlockOuting ? styles.hideshowdivshow : styles.hideshowdiv}`}>
+                    <BlockDatesBtn toggleShowBlockOuting={toggleShowBlockOuting} titleDialog={false} /> 
+                </div>
+            </div>
+           
+        </div> */}
+      
+       
+      
+     
+<div className={styles.verticalsection} style={{height:'80vh', width:'100%',gap:'8px'}}>
+
+    {/* <div className={styles.horizontalsection} style={{height:'100%', width:'100%'}}> */}
+
+    {/* <RadioGroup defaultValue={(viewTypeSelection == 'college') ? "college" : "hostel"} value={viewTypeSelection} onValueChange={setViewTypeSelection} className="flex flex-row items-center">
+        <Label className="text-sm text-muted-foreground">View by:</Label>
+        <div className="flex items-center space-x-2">
+            <RadioGroupItem value="college" id="r11" />
+            <Label htmlFor="r11" className="text-md font-medium">Colleges</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+            <RadioGroupItem value="hostel" id="r22" />
+            <Label htmlFor="r22" className="text-md font-medium">Hostels</Label>
+        </div>
+    </RadioGroup> */}
+
+
+{/* <div className="p-2 border rounded flex flex-row " style={{height:'fit-content', gap: '40px'}}>
+    
+<div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px',height:'fit-content'}}>
+    <div className="flex-1 text-sm text-muted-foreground">Total Hostels Strength:</div>
+    {searching ? <div className={styles.horizontalsection}>
+        <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+        <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
+    </div> : ''}
+    <h1>{totalHostelsStrength}</h1>
+</div>
+
+<div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px',height:'fit-content'}}>
+    
+    <div className="flex-1 text-sm text-muted-foreground">In Outing:</div>
+    {searching ? <div className={styles.horizontalsection}>
+        <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+        <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
+    </div> : ''}
+    <h1>{totalInOutingStrength}</h1>
+</div>
+<div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px',height:'fit-content'}}>
+    
+    <div className="flex-1 text-sm text-muted-foreground">In Hostel:</div>
+    {searching ? <div className={styles.horizontalsection}>
+        <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+        <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
+    </div> : ''}
+    <h1>{totalInHostelStrength}</h1>
+</div>
+</div> */}
+
+
+
+
+
+{/*     
+<Select
+  value={selectedCampus}
+  onChange={setSelectedCampus}
+  items={campusItems}
+/> */}
+
+
+{/* {(allRequests.length !=0) ? */}
+<div className="mx-auto" style={{width:'100%',height:'100%'}}>
+{/* <div className="container mx-auto py-10"> */}
+{/* <div>{allRequests.length}</div> */}
+  {/* <DataTable columns={columns} data={allRequests} status={currentStatus} downloadNow={downloadRequestsNow} initialDates={initialDatesValues} requestAgain={updateOffset} loadingIds={loadingIds} /> */}
+  {/* <DataTable columns={columns} data={allRequests} status={currentStatus} changeStatus={updateStatus} downloadNow={downloadRequestsNow} initialDates={initialDatesValues} dates={changeDatesSelection} requestAgain={updateOffset} takeAction={acceptAppointment}/> */}
+  
+</div>
+{/* : null} */}
+
+
+
+{/* <div className="md:hidden">
+    <Image
+      src="/examples/tasks-light.png"
+      width={1280}
+      height={998}
+      alt="Playground"
+      className="block dark:hidden"
+    />
+    <Image
+      src="/examples/tasks-dark.png"
+      width={1280}
+      height={998}
+      alt="Playground"
+      className="hidden dark:block"
+    />
+  </div>
+  <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
+    <div className="flex items-center justify-between space-y-2">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
+        <p className="text-muted-foreground">
+          Here&apos;s a list of your tasks for this month!
+        </p>
+      </div>
+      <div className="flex items-center space-x-2">
+        <UserNav />
+      </div>
     </div>
-    
-    
-  );
+    <DataTable data={allRequests} columns={columns} />
+  </div> 
+
+             <div className={styles.carddatasection} key={12345} style={{height:'100%',overflow:'scroll'}}>
+                   
+                <div className={styles.verticalsection} >
+                    <p className={`${inter.className} ${styles.text3_heading}`}>Students</p>
+                    <div className={styles.horizontalsection}>
+                        <p className={`${inter.className} ${styles.text3_heading}`}>Total:</p>
+                        <div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px'}}>
+                            
+                            {searching ? <div className={styles.horizontalsection}>
+                                <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                                <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
+                            </div> : ''}
+                            <h1>{studentsInCampus}</h1>
+                        </div>
+                        
+                        <div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px'}}>
+                            
+                            <p className={`${inter.className} ${styles.text3_heading}`}>Registered:</p>
+                            {searching ? <div className={styles.horizontalsection}>
+                                <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                                <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
+                            </div> : ''}
+                            <h1>{totalStudents}</h1>
+                        </div>
+                    </div>
+                  </div>
+            <div>
+                
+            </div>
+        </div>  */}
+    {/* </div> */}
+           
+            
+    </div>
+
+</div>
+
+
+);
 }
+

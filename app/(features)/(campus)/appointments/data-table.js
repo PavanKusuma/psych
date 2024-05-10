@@ -2,7 +2,7 @@
 
 
 import * as React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { ArrowDown, CalendarBlank, SpinnerGap } from 'phosphor-react'
 import { addDays, format } from "date-fns"
 import { DateRange } from "react-day-picker"
@@ -68,12 +68,16 @@ export function DataTable({ data, status, changeStatus, downloadNow, initialDate
 
   const today = new dayjs();
   const { toast } = useToast();
-  const [notes, setNotes] = useState('');
+  const textareaRef = useRef(null); // Creates a ref object
+
 
   const handleNotesSaveChanges = (row) => {
     // console.log(document.getElementById('appointmentnotes').value);  // Now you have the username value when "Save changes" is clicked
-    console.log('Notes:', notes);  // Now you have the username value when "Save changes" is clicked
-    handleCompleteClick(row, notes)
+    
+    if (textareaRef.current) {
+      console.log('Entered text:', textareaRef.current.value); // Accesses the textarea value directly
+    }
+    handleCompleteClick(row, textareaRef.current.value)
   };
 
   const biscuits = new Biscuits;
@@ -113,16 +117,16 @@ const columns = [
                   <SheetTrigger className="text-green-700 underline underline-offset-4 text-md text-foreground">{ row.getValue("collegeId")}</SheetTrigger>
                   <SheetContent>
                     <SheetHeader>
-                      <SheetTitle>Student Details</SheetTitle>
+                      <SheetTitle>{row.getValue("username")}</SheetTitle>
                       <SheetDescription>
-                        <h1 className="text-black-700 text-xl text-foreground">{ row.getValue("collegeId")}</h1>
+                        <p className="text-black-700 text-md text-foreground">{row.getValue("campusId")} - {row.getValue("course")} - {row.getValue("branch")} - {row.getValue("year")}</p>
                       
                       <br/>
                       <br/>
 
                         <div className="flex flex-wrap justify-between items-center py-2.5">
                             <p>Full name:</p>
-                            <p className="text-black-700 text-md ont-semibold text-foreground">{ row.getValue("collegeId")}</p>
+                            <p className="text-black-700 text-md ont-semibold text-foreground">{ row.getValue("username")}</p>
                         </div>
                         <Separator />
                         
@@ -131,10 +135,17 @@ const columns = [
                             <p className="text-black-700 text-md ont-semibold text-foreground">{ row.getValue("collegeId")}</p>
                         </div>
                         <Separator />
-                        
+                        <div className="flex flex-wrap justify-between items-center py-2.5">
+                            <p>Email:</p>
+                            <p className="text-black-700 text-md ont-semibold text-foreground">{ row.getValue("email")}</p>
+                        </div>
+                        <Separator />
+                        <div className="flex flex-wrap justify-between items-center py-2.5">
+                            <p>Phone:</p>
+                            <p className="text-black-700 text-md ont-semibold text-foreground">{ row.getValue("phoneNumber")}</p>
+                        </div>
                         <Separator />
                         
-                        <Separator />
                       </SheetDescription>
                     </SheetHeader>
                   </SheetContent>
@@ -143,6 +154,38 @@ const columns = [
                   
                 </div>
       },
+    },
+    {
+      enableHiding: true,
+      accessorKey: "campusId",
+    },
+    {
+      enableHiding: true,
+      accessorKey: "username",
+    },
+    {
+      enableHiding: true,
+      accessorKey: "email",
+    },
+    {
+      enableHiding: true,
+      accessorKey: "phoneNumber",
+    },
+    {
+      enableHiding: true,
+      accessorKey: "course",
+    },
+    {
+      enableHiding: true,
+      accessorKey: "branch",
+    },
+    {
+      enableHiding: true,
+      accessorKey: "year",
+    },
+    {
+      enableHiding: true,
+      accessorKey: "gender",
     },
     {
       enableHiding: true,
@@ -175,6 +218,10 @@ const columns = [
     {
       accessorKey: "topic",
       header: "Topic"
+    },
+    {
+      accessorKey: "notes",
+      header: "Notes"
     },
     {
       accessorKey: "description",
@@ -238,13 +285,13 @@ const columns = [
   //  console.log(payment);
         
         return (row.getValue("requestStatus") == 'Submitted') ? <div>
-                  {/* <Button variant="secondary">Reschedule</Button> */}
-                  {loadingIds.has(row.original.appointmentId) ? (
+                  
+                  {/* {loadingIds.has(row.original.appointmentId) ? (
                       <SpinnerGap className={`${styles.icon} ${styles.load}`} /> 
                   ) : (
                       <Button onClick={() => handleTimeUpdateClick(row)} variant="secondary">Reschedule</Button>
                   )}
-              &nbsp;
+              &nbsp; */}
                   {/* <Button type="button" variant="outline" onClick={() => declineAppointment(row)}>Decline</Button> */}
                   {loadingIds.has(row.original.appointmentId) ? (
                       <SpinnerGap className={`${styles.icon} ${styles.load}`} /> 
@@ -278,33 +325,48 @@ const columns = [
                             </DialogDescription>
                           </DialogHeader>
                           <div className="grid gap-4 py-4">
-                            {/* <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="name" className="text-right">
-                                Name
-                              </Label>
-                              <Input
-                                id="name"
-                                defaultValue="Pedro Duarte"
-                                className="col-span-3"
-                              />
-                            </div> */}
                             <div className="items-center gap-4">
                               <Label htmlFor="username" className="text-right">
                                 Notes
                               </Label>
-                              <Textarea id="appointmentnotes" placeholder="Type your notes here." 
-                              value="check"
-                              onChange={(e) => setNotes(e.target.value)}
-                              />
-                              {/* <Input
-                                id="username"
-                                defaultValue="@peduarte"
-                                className="col-span-3"
-                              /> */}
+                              <Textarea ref={textareaRef} id="appointmentnotes" placeholder="Type your notes here." />
                             </div>
                           </div>
                           <DialogFooter>
                             <Button type="submit" onClick={() => handleNotesSaveChanges(row)}>Save changes</Button>
+                            {/* <Button type="submit" onClick={() => handleCompleteClick(row, notes)}>Save changes</Button> */}
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                      // <Button onClick={() => handleAcceptClick(row.original.appointmentId)}>Accept</Button>
+                  )}
+              
+        </div>
+        : (row.getValue("requestStatus") == 'Completed') ? <div>
+              
+                  {loadingIds.has(row.original.appointmentId) ? (
+                      <SpinnerGap className={`${styles.icon} ${styles.load}`} />  // Placeholder for your progress indicator
+                  ) : (
+                      // <Button onClick={() => handleCompleteClick(row)}>Mark as complete</Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button>View notes</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Meeting notes</DialogTitle>
+                            {/* <DialogDescription>
+                            {row.getValue("notes")}
+                            </DialogDescription> */}
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="items-center gap-4">
+                              {row.getValue("notes")}
+                              
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            {/* <Button type="submit" onClick={() => handleNotesSaveChanges(row)}>Save changes</Button> */}
                             {/* <Button type="submit" onClick={() => handleCompleteClick(row, notes)}>Save changes</Button> */}
                           </DialogFooter>
                         </DialogContent>
@@ -686,7 +748,7 @@ async function declineAppointment(row){
               
           
           {/* : <br/>} */}
-          <Button variant="outline" onClick={()=>downloadNow()}> <ArrowDown className="mr-2 h-4 w-4"/> Download</Button>
+          {/* <Button variant="outline" onClick={()=>downloadNow()}> <ArrowDown className="mr-2 h-4 w-4"/> Download</Button> */}
         </div>
       </div>
       
@@ -697,7 +759,7 @@ async function declineAppointment(row){
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   
-                  if(header.id == 'requestStatus' || header.id == 'appointmentId'){
+                  if(header.id == 'requestStatus' || header.id == 'appointmentId' || header.id == 'notes' || header.id == 'campusId' || header.id == 'username' || header.id == 'email' || header.id == 'phoneNumber' || header.id == 'course' || header.id == 'branch' || header.id == 'year' || header.id == 'gender'){
                     return null
                   }
                   else {
@@ -731,7 +793,7 @@ async function declineAppointment(row){
                   {row.getVisibleCells().map(cell => (
                     // console.log(cell.column.id),
                     // (cell.column.id == 'actions') ? cell.column.onClick=()=>acceptAppointment('Submitted') : 'ok',
-                    (cell.column.id == 'requestStatus' || cell.column.id == 'appointmentId') ? null :
+                    (cell.column.id == 'requestStatus' || cell.column.id == 'appointmentId' || cell.column.id == 'notes' || cell.column.id == 'campusId' || cell.column.id == 'username' || cell.column.id == 'email' || cell.column.id == 'phoneNumber' || cell.column.id == 'course' || cell.column.id == 'branch' || cell.column.id == 'year' || cell.column.id == 'gender') ? null :
                     // (cell.column.id == 'requestStatus') ? null :
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

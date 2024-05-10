@@ -339,7 +339,7 @@ export default function Appointments() {
     // handle time update click to update a row
     const handleTimeUpdateClick = (row) => {
         
-        setLoadingIds(prev => new Set(prev.add(row.getValue('appointmentId'))));
+        // setLoadingIds(prev => new Set(prev.add(row.getValue('appointmentId'))));
 
         // Simulate API call
         // completeAppointment(row, handleRemoveAppointment, () => {
@@ -1761,7 +1761,7 @@ const handleCourseChange = (newCourse) => {
     async function completeAppointment(row, notes, handleRemoveAppointment, callback){
 
       try {    
-          var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD");
+          var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD hh:mm:ss");
           
           console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes);
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes)

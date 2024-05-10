@@ -66,29 +66,82 @@ export async function GET(request,{params}) {
                 // if SuperAdmin, get all the requests w.r.t status
                 else if(params.ids[1] == 'PsychAdmin'){
 
-                    let query = '';
-                    // check what type of requests to be shown
+                    // get the list of assessments
+                    if(params.ids[2] == 1) {
+                        let query = '';
+                        // check what type of requests to be shown
 
-                    if(params.ids[2] == 'All'){
-                        query = 'SELECT * FROM psych_assessments ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
-                    }
-                    else {
-                        query = 'SELECT * FROM psych_assessments where campusId = "'+params.ids[2]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
-                    }
-                    
-                    console.log(query);
-                    const [rows, fields] = await connection.execute(query);
-                    connection.release();
+                        if(params.ids[3] == 'All'){
+                            query = 'SELECT * FROM psych_assessments ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                        }
+                        else {
+                            query = 'SELECT * FROM psych_assessments where campusId = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                        }
+                        
+                        // console.log(query);
+                        const [rows, fields] = await connection.execute(query);
+                        connection.release();
 
-                    // check if user is found
-                    if(rows.length > 0){
-                        // return the requests data
-                        return Response.json({status: 200, message:'Data found!', data: rows}, {status: 200})
+                        // check if user is found
+                        if(rows.length > 0){
+                            // return the requests data
+                            return Response.json({status: 200, message:'Data found!', data: rows}, {status: 200})
 
+                        }
+                        else {
+                            // user doesn't exist in the system
+                            return Response.json({status: 404, message:'No new requests!'}, {status: 200})
+                        }
                     }
-                    else {
-                        // user doesn't exist in the system
-                        return Response.json({status: 404, message:'No new requests!'}, {status: 200})
+
+                    // get the list of assessment results
+                    else if(params.ids[2] == 2){
+                        let query1 = '', query2 = '';
+                        // check what type of requests to be shown
+
+                        query1 = 'SELECT * FROM psych_results where assessmentId = "'+params.ids[3]+'"';
+                        query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                        
+                        // console.log(query1);
+                        const [rows, fields] = await connection.execute(query1);
+                        const [rows1, fields1] = await connection.execute(query2);
+                        connection.release();
+
+                        // check if user is found
+                        if(rows.length > 0){
+                            // return the requests data
+                            return Response.json({status: 200, message:'Data found!', results: rows, answers: rows1}, {status: 200})
+
+                        }
+                        else {
+                            // user doesn't exist in the system
+                            return Response.json({status: 404, message:'No new requests!'}, {status: 200})
+                        }
+                    }
+                    // get the students of specific result type of an assessment
+                    else if(params.ids[2] == 3){
+                        let query1 = '', query2 = '';
+                        const collegeIds = params.ids[3].split(',');
+                        const formattedIds = collegeIds.map(id => `'${id}'`).join(', ');
+
+                        // check what type of requests to be shown
+
+                        query2 = `SELECT username, collegeId, campusId, email, gender, phoneNumber, course, branch, year FROM users where collegeId IN (${formattedIds})`;
+                        
+                        // console.log(query2);
+                        const [rows1, fields1] = await connection.execute(query2);
+                        connection.release();
+
+                        // check if user is found
+                        if(rows1.length > 0){
+                            // return the requests data
+                            return Response.json({status: 200, message:'Data found!', data: rows1}, {status: 200})
+
+                        }
+                        else {
+                            // user doesn't exist in the system
+                            return Response.json({status: 404, message:'No new requests!'}, {status: 200})
+                        }
                     }
                     
                 }

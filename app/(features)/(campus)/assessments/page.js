@@ -26,7 +26,7 @@ import {DataTable} from "./data-table"
 // get the appointments for PsychAdmin
 const getAllAppointmentsDataAPI = async (pass, role, campusId, offset) => 
   
-fetch("/api/psych/assessments/"+pass+"/"+role+"/"+campusId+"/"+offset, {
+fetch("/api/psych/assessments/"+pass+"/"+role+"/1/"+campusId+"/"+offset, {
     method: "GET",
     headers: {
         "Content-Type": "application/json",
@@ -112,60 +112,8 @@ export default function Assessments() {
         });
         
     };
-    // handle complete click to update a row
-    const handleCompleteClick = (row, notes) => {
-        
-        setLoadingIds(prev => new Set(prev.add(row.getValue('appointmentId'))));
-        console.log(notes);
-
-        // Simulate API call
-        completeAppointment(row, notes, handleRemoveAppointment, () => {
-            setLoadingIds(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(row.getValue('appointmentId'));
-                return newSet;
-            });
-
-            toast({description: "Appointment completed!",});
-        });
-        
-    };
-    // handle cancel click to update a row
-    const handleCancelClick = (row) => {
-        
-        setLoadingIds(prev => new Set(prev.add(row.getValue('appointmentId'))));
-
-        // Simulate API call
-        cancelAppointment(row, handleRemoveAppointment, () => {
-            setLoadingIds(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(row.getValue('appointmentId'));
-                return newSet;
-            });
-
-            toast({description: "Appointment cancelled!",});
-        });
-        
-    };
-    // handle time update click to update a row
-    const handleTimeUpdateClick = (row) => {
-        
-        setLoadingIds(prev => new Set(prev.add(row.getValue('appointmentId'))));
-
-        // Simulate API call
-        // completeAppointment(row, handleRemoveAppointment, () => {
-        //     setLoadingIds(prev => {
-        //         const newSet = new Set(prev);
-        //         newSet.delete(row.getValue('appointmentId'));
-        //         return newSet;
-        //     });
-
-        //     toast({description: "Appointment completed!",});
-        // });
-        
-    };
-
-
+    
+    
     // get the user and fire the data fetch
     useEffect(()=>{
 
@@ -176,7 +124,7 @@ export default function Assessments() {
                 // set the user state variable
                 setUser(obj)
                 
-                if(!completed){
+                if(!completed && allRequests.length == 0){
                     getAllRequests()
                 }
                 else {
@@ -233,22 +181,18 @@ export default function Assessments() {
             //     paramBranchYears = 'All';
             // }
             // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, 
-            console.log("/api/psych/assessments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/All/"+offset);
+            // console.log("/api/psych/assessments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/All/"+offset);
             const result  = await getAllAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, 'All',  offset, )
             
             // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, status, 0, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId, 'CSE,IT', 'All', '111', '0', JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).campusId, dates, 'BTECH-IT-2,BTECH-IT-3')
             const queryResult = await result.json() // get data
 
-            console.log(queryResult);
             // check for the status
             if(queryResult.status == 200){
 
                 // check if data exits
                 if(queryResult.data.length > 0){
 
-                    // set the state
-                    // outing data
-                    
                     setAllRequests(queryResult.data);
                     // if(allRequests.length > 0){
                     //     setAllRequests(allRequests.push(queryResult.data));
@@ -1091,7 +1035,7 @@ const handleCourseChange = (newCourse) => {
       try {    
           var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD");
           
-          console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S1/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId'));
+        //   console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S1/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId'));
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S1/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId'))
           const queryResult = await result.json() // get data
 
@@ -1120,7 +1064,7 @@ const handleCourseChange = (newCourse) => {
       try {    
           var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD");
           
-          console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes);
+        //   console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes);
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes)
           const queryResult = await result.json() // get data
 
@@ -1149,7 +1093,7 @@ const handleCourseChange = (newCourse) => {
       try {    
           var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD");
           
-          console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'));
+        //   console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'));
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'))
           const queryResult = await result.json() // get data
 

@@ -62,14 +62,18 @@ export async function GET(request,{params}) {
                         // get the unassigned appointments by campus
                         var query1 = '', query2 = '';
                         if(params.ids[6] == 'All'){ // check if we need to call all campuses data or specific campus
-                            query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            query1 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.requestStatus = "'+params.ids[3]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                             // get the assigned appointments by campus
-                            query2 = 'SELECT * FROM psych_appointment WHERE adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
+                            // query2 = 'SELECT * FROM psych_appointment WHERE adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
+                            query2 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.adminId = "'+params.ids[5]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
                         }
                         else {
-                            query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" AND campusId = "'+params.ids[6]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" AND campusId = "'+params.ids[6]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            query1 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.requestStatus = "'+params.ids[3]+'" AND a.campusId = "'+params.ids[6]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                             // get the assigned appointments by campus
-                            query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            // query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            query2 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.campusId = "'+params.ids[6]+'" AND a.adminId = "'+params.ids[5]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                         }
                     
                         const [rows1, fields1] = await connection.execute(query1);

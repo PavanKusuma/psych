@@ -2,6 +2,7 @@
 
 
 import Dashboard from '../../(features)/(campus)/dashboard/page'
+import Appointments from '../../(features)/(campus)/appointments/page'
 import { Inter, DM_Sans, DM_Serif_Text } from 'next/font/google'
 import { SpinnerGap } from 'phosphor-react'
 import { useEffect, useState } from 'react'
@@ -126,7 +127,7 @@ async function loginHere(){
             const result  = await verifyUser(process.env.NEXT_PUBLIC_API_PASS, document.getElementById('collegeId').value, otp)
             const resultData = await result.json() // get data
             setQueryResult(resultData); // store data
-            console.log(resultData);
+            // console.log(resultData);
             // check if query result status is 200
             // if 200, that means, user is found and OTP is sent
             if(resultData.status == 200) {
@@ -194,7 +195,7 @@ async function loginHere(){
 
         // show and hide message
         setResultType('error');
-        setResultMessage('Error reaching server. Please try again later!');
+        // setResultMessage('Error reaching server. Please try again later!');
         setTimeout(function(){
             setResultType('');
             setResultMessage('');
@@ -283,7 +284,7 @@ function verifyOTP(){
             // for now navigate the students to update their profile specific images
             if(queryResult.data.role == 'PsychAdmin')
             {
-                router.push('/dashboard')
+                router.push('/appointments')
             }
             else if(queryResult.data.role == 'Student'){
                 
@@ -336,7 +337,8 @@ function verifyOTP(){
         
         {(session) ? 
         //   <Registration />
-          <Dashboard />
+        //   <Dashboard />
+          <Appointments />
           :
         <div className={styles.titlecard}>
             <div className={styles.section_one}>
@@ -344,7 +346,10 @@ function verifyOTP(){
                 <img src="/sc_logo2.png" style={{height:'80px', width:'80px', float:'left'}}/>
             </div> */}
             <br/>
-            <h1 className={`${dmSerifText.className}`} >Dear Me</h1>
+            
+            <div className={`${dmSerifText.className}`} >
+            <h1 className="text-4xl font-semibold" >Dear Me</h1>
+            </div>
             {/* <div >
                 <img src="/svecw_sc_logo.svg" style={{height:'46px', width:'220px', float:'left'}}/>
             </div> */}
@@ -356,24 +361,24 @@ function verifyOTP(){
                 {(!userFound) ?
                 <div className={styles.card_block1}>
             
-                    <p className={`${inter.className} ${styles.text2}`}>Your college registered Id </p><br/>
-                    {/* <input id="collegeId" className={`${inter.className} ${styles.text2} ${styles.textInput}`} placeholder="" onKeyDown={handleKeyPress}/> */}
+                    <p className={`${dmSans.className} ${styles.text2}`}>Your college registered Id </p><br/>
+                    {/* <input id="collegeId" className={`${dmSans.className} ${styles.text2} ${styles.textInput}`} placeholder="" onKeyDown={handleKeyPress}/> */}
                     <Input id="collegeId" placeholder="" onKeyDown={handleKeyPress}/>
                     <br/>
-                    <Button id="submit" onClick={loginHere.bind(this)}>Sign in</Button>
-                    {/* <button id="submit" onClick={loginHere.bind(this)} className={`${inter.className} ${styles.text2} ${styles.primarybtn}`}>Sign in</button> */}
-                    <br/>
-                    <br/>
+                    <Button id="submit" onClick={loginHere.bind(this)} className={`${dmSans.className}`}>Sign in</Button>
+                    {/* <button id="submit" onClick={loginHere.bind(this)} className={`${dmSans.className} ${styles.text2} ${styles.primarybtn}`}>Sign in</button> */}
+                    {/* <br/> */}
+                    {/* <br/> */}
                         {(errorMsg.length > 0) ? 
                             
-                            <div className={`${styles.error} ${inter.className} ${styles.text2}`}>{errorMsg}</div>
+                            <div className={`${styles.error} ${dmSans.className} ${styles.text2}`}>{errorMsg}</div>
                             :''}
                         
                     <br/>
                     
                     {(infoMsg) ?
                     <div className={infoMsg ? '':'styles.hidden'}>
-                        <div className={`${inter.className} ${styles.text2}`}>
+                        <div className={`${dmSans.className} ${styles.text2}`}>
                             <br/>We couldnot find you in our system for any of below reasons:<br/>
                             <ul style={{listStyle:'none'}}>
                                 <li>1. Your college Id might be incorrect.</li>
@@ -381,15 +386,15 @@ function verifyOTP(){
                             </ul>  
                         </div>
                         <br/>
-                        <p className={`${inter.className} ${styles.text3}`}>Please contact your college administration or drop a mail with your campus name to <a href="mailto:hello.helpmecode@gmail.com"  className={styles.information}>hello.helpmecode@gmail.com</a></p>
+                        <p className={`${dmSans.className} ${styles.text3}`}>Please contact your college administration or drop a mail with your campus name to <a href="mailto:hello.helpmecode@gmail.com"  className={styles.information}>hello.helpmecode@gmail.com</a></p>
                         <br/>
                     </div>
                     :
                     ''}
                     
-                    <div>
-                        <p className={`${inter.className} ${styles.text3}`}>No account? <a href="/signup"  className={styles.secondarybtn}>Join now</a></p>
-                    </div>
+                    {/* <div>
+                        <p className={`${dmSans.className} ${styles.text3}`}>No account? <a href="/signup"  className={styles.secondarybtn}>Join now</a></p>
+                    </div> */}
                     
                 </div>
                 :
@@ -405,8 +410,8 @@ function verifyOTP(){
                     <div className={styles.horizontalsection}>
                         {/* <Loader className={`${styles.icon} ${styles.load}`} /> */}
                         <SpinnerGap className={`${styles.icon} ${styles.load}`} />
-                        <p className={`${inter.className} ${styles.text3}`}>Sending OTP ...</p> 
-                        {/* <p className={`${inter.className} ${styles.text3}`}>Sending OTP to {username}...</p>  */}
+                        <p className={`${dmSans.className} ${styles.text3}`}>Sending OTP ...</p> 
+                        {/* <p className={`${dmSans.className} ${styles.text3}`}>Sending OTP to {username}...</p>  */}
                     </div>
                 </div>
                 :''}
@@ -417,22 +422,22 @@ function verifyOTP(){
             <div>
                 {(otpSent) ?
                 <div className={styles.card_block1}>
-                    <p className={`${inter.className} ${styles.text3}`}>Verify your mobile</p>
-                    <p className={`${inter.className} ${styles.text2}`}>Please enter the verification code sent to {email.slice(0, 4).padEnd(email.length, '*')}</p>
+                    <p className={`${dmSans.className} ${styles.text3}`}>Verify your mobile</p>
+                    <p className={`${dmSans.className} ${styles.text2}`}>Please enter the verification code sent to {email.slice(0, 4).padEnd(email.length, '*')}</p>
                     {/* {phone.slice(0, 4).padEnd(phone.length, '*')} or  */}
                     <br/>
-                    <input id="otp" className={`${styles.input_one} ${inter.className} ${styles.text3}`} placeholder="OTP" maxLength="4" style={{letterSpacing:30}}  onKeyDown={handleOTPKeyPress}/>
+                    <input id="otp" className={`${styles.input_one} ${dmSans.className} ${styles.text3}`} placeholder="OTP" maxLength="4" style={{letterSpacing:30}}  onKeyDown={handleOTPKeyPress}/>
                     <br/>
                     <br/>
-                    {/* <button onClick={clearCookies.bind(this)} className={`${inter.className} ${styles.secondarybtn}`}>back</button> &nbsp;&nbsp; */}
-                    {/* <button onClick={verifyOTP.bind(this)} className={`${inter.className} ${styles.primarybtn}`} >Verify OTP</button> */}
-                    <Button onClick={clearCookies.bind(this)} variant="secondary">Back</Button> &nbsp;&nbsp;
-                    <Button onClick={verifyOTP.bind(this)}>Verify OTP</Button>
+                    {/* <button onClick={clearCookies.bind(this)} className={`${dmSans.className} ${styles.secondarybtn}`}>back</button> &nbsp;&nbsp; */}
+                    {/* <button onClick={verifyOTP.bind(this)} className={`${dmSans.className} ${styles.primarybtn}`} >Verify OTP</button> */}
+                    <Button onClick={clearCookies.bind(this)} variant="secondary" className={`${dmSans.className}`}>Back</Button> &nbsp;&nbsp;
+                    <Button onClick={verifyOTP.bind(this)} className={`${dmSans.className}`} >Verify OTP</Button>
                     <div>
                         {(verifyOtpMsg.length) > 0 ?
                         <div>
                             <br/><br/>
-                            <span className={`${inter.className} ${styles.text2}`}>{verifyOtpMsg}</span>
+                            <span className={`${dmSans.className} ${styles.text2}`}>{verifyOtpMsg}</span>
                         </div>
                         :''}
                     </div>
@@ -442,6 +447,8 @@ function verifyOTP(){
             
             
             {(resultMessage.length > 0) ? <Toast type={resultType} message={resultMessage} /> : ''}
+
+            <p><span className={`${dmSans.className} ${styles.text2}`}>Privacy</span></p>
 
             </div>
         </div>

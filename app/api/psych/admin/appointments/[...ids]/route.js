@@ -51,16 +51,13 @@ export async function GET(request,{params}) {
                 // if SuperAdmin, get all the requests w.r.t status
                 else if(params.ids[1] == 'PsychAdmin'){
 
-                    // verify what type of requests admin is asking
-                    let query = '';
-                    let query1 = '';
-                    let query2 = '';
-
                     // based on the status, the query might change because of the ORDER BY
                     if(params.ids[2] == 'S1'){
 
+                        let query1 = '';
+                        let query2 = '';
+
                         // get the unassigned appointments by campus
-                        var query1 = '', query2 = '';
                         if(params.ids[6] == 'All'){ // check if we need to call all campuses data or specific campus
                             // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                             query1 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.requestStatus = "'+params.ids[3]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
@@ -93,7 +90,7 @@ export async function GET(request,{params}) {
                     }
                     else if(params.ids[2] == 'S2'){
                         
-                        query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
+                        let query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
                         const [rows, fields] = await connection.execute(query);
                         connection.release();
                     
@@ -111,7 +108,7 @@ export async function GET(request,{params}) {
                     }
                     else if(params.ids[2] == 'S3'){
                         
-                        query = 'SELECT * FROM psych_appointment ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
+                        let query = 'SELECT * FROM psych_appointment ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
                         const [rows, fields] = await connection.execute(query);
                         connection.release();
                     

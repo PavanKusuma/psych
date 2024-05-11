@@ -266,7 +266,7 @@ function downloadNow(resultId) {
      
         {(assessmentType == 1) ? 
             <div>The evaluation of this assessment is based on {allResults.length} categories</div>
-            : <div>This assessment's evaluation is based on {allResults.length} ranges</div>
+            : <div>This assessment evaluation is based on {allResults.length} ranges</div>
         }
         
         <div className={`${inter.className}`} style={{display:'flex',flexDirection:'row',justifyContent:'space-between', width:'100%', alignItems: 'start',gap:'8px'}}>

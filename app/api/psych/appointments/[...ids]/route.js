@@ -28,10 +28,7 @@ export async function GET(request,{params}) {
                 // if SuperAdmin, get all the requests w.r.t status
                 if(params.ids[1] == 'Student'){
 
-                    let query = '';
-                    // check what type of requests to be shown
-                    
-                    query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                    let query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
                     const [rows, fields] = await connection.execute(query);
                     connection.release();
 
@@ -51,13 +48,12 @@ export async function GET(request,{params}) {
                 // if SuperAdmin, get all the requests w.r.t status
                 else if(params.ids[1] == 'PsychAdmin'){
 
-                    // verify what type of requests admin is asking
-                    let query = '';
-                    let query1 = '';
-                    let query2 = '';
-
                     // based on the status, the query might change because of the ORDER BY
                     if(params.ids[2] == 'S1'){
+
+                        // verify what type of requests admin is asking
+                        let query1 = '';
+                        let query2 = '';
 
                         // get the unassigned appointments by campus
                         if(params.ids[6] == 'All'){
@@ -67,14 +63,13 @@ export async function GET(request,{params}) {
                         }
                         else {
                             query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "Submitted" AND campusId = "'+params.ids[6]+'" AND isOpen = 1 ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                        // get the assigned appointments by campus
-                        query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            // get the assigned appointments by campus
+                            query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                         }
                         // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "Submitted" AND campusId = "'+params.ids[6]+'" AND isOpen = 1 ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
                         // // get the assigned appointments by campus
                         // query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-console.log(query1);
-console.log(query2);
+
 
                         const [rows1, fields1] = await connection.execute(query1);
                         const [rows2, fields2] = await connection.execute(query2);
@@ -93,7 +88,7 @@ console.log(query2);
                     }
                     else if(params.ids[2] == 'S2'){
                         
-                        query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
+                        let query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
                         const [rows, fields] = await connection.execute(query);
                         connection.release();
                     
@@ -111,7 +106,7 @@ console.log(query2);
                     }
                     else if(params.ids[2] == 'S3'){
                         
-                        query = 'SELECT * FROM psych_appointment ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
+                        let query = 'SELECT * FROM psych_appointment ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
                         const [rows, fields] = await connection.execute(query);
                         connection.release();
                     

@@ -6,6 +6,15 @@ import dayjs from 'dayjs'
 // 2 offset – 0
 // 3 campusId - SVECW or All
 // 4 collegeId - Super33
+
+
+                        // Convert time to minutes since midnight
+                        const toMinutes = time => {
+                            const [hour, minute] = time.split(':').map(Number);
+                            return hour * 60 + minute;
+                        };
+
+
 export async function GET(request,{params}) {
 
     // get the pool connection to db
@@ -20,45 +29,97 @@ export async function GET(request,{params}) {
                 // if SuperAdmin, get all the requests w.r.t status
                 if(params.ids[1] == 'Student'){
 
-                    let query = '';
-                    // check what type of requests to be shown
-                    
-                    query = `SELECT 
-                                DISTINCT a.assessmentId,
-                                a.campusId,
-                                a.media,
-                                a.title,
-                                a.title2,
-                                a.description,
-                                a.adminId,
-                                a.createdOn,
-                                a.assessmentType,
-                                CASE
-                                    WHEN ans.collegeId IS NOT NULL THEN 'yes'
-                                    ELSE 'no'
-                                END AS assessmentStatus,
-                                    CASE
-                                    WHEN ans.collegeId IS NOT NULL THEN ans.createdOn
-                                    ELSE '-'
-                                END AS assessmentOn
-                                    
-                            FROM psych_assessments a
-                            LEFT JOIN (SELECT assessmentId, collegeId, createdOn FROM psych_answers order by createdOn DESC LIMIT 1) ans 
-                            ON a.assessmentId = ans.assessmentId AND ans.collegeId = ?
-                            WHERE a.campusId = ?`;
-                    // query = 'SELECT * FROM psych_assessments WHERE campusId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
-                    const [rows, fields] = await connection.execute(query, [params.ids[4], params.ids[3]]);
-                    connection.release();
+                    // Get the list of available admins who have marked their calendar
+                    if(params.ids[2] == 1){
+                        let query = 'SELECT DISTINCT(p.collegeId),u.username,u.userImage FROM `psych_calendar` p JOIN users u ON p.collegeId=u.collegeId';
+                        const [rows1, fields1] = await connection.execute(query);
+                        connection.release();
+                        // check if user is found
+                        if(rows1.length > 0){
+                            // return the requests data
+                            return Response.json({status: 200, message:'Data found!', data: rows1}, {status: 200})
 
-                    // check if user is found
-                    if(rows.length > 0){
-                        // return the requests data
-                        return Response.json({status: 200, message:'Data found!', data: rows}, {status: 200})
-
+                        }
+                        else {
+                            // user doesn't exist in the system
+                            return Response.json({status: 404, message:'No admins found!'}, {status: 200})
+                        }
+                        
                     }
-                    else {
-                        // user doesn't exist in the system
-                        return Response.json({status: 404, message:'No new requests!'}, {status: 200})
+                    // Get the available time slot for the given "Day" for the given "user"
+                    // Get the appointments for the given "user" for the selected "date"
+                    // Using the results, find the time slot that is free
+                    else if(params.ids[2] == 2){
+                        let query1 = '';
+                        let query2 = '';
+                        query1 = 'SELECT startTime as start, endTime as end FROM `psych_calendar` WHERE collegeId="'+params.ids[3]+'" AND day="'+params.ids[4]+'"';
+                        query2 = 'SELECT startTime as start, endTime as end FROM `psych_appointment` WHERE adminId="'+params.ids[3]+'" AND DATE(requestDate) = "'+params.ids[5]+'" AND requestStatus="Confirmed" AND isOpen=1';
+                    
+
+                        const [rows, fields] = await connection.execute(query1);
+                        const [rows1, fields1] = await connection.execute(query2);
+                        connection.release();
+
+                        // console.log(query2);
+                        // console.log(rows);
+                        // console.log(rows1);
+
+                        // Prepare the slots and appointments
+                        let slots = rows.map(time => ({
+                            start: toMinutes(time.start),
+                            end: toMinutes(time.end)
+                        }));
+
+                        const busyTimes = rows1.map(app => ({
+                            start: toMinutes(app.start),
+                            end: toMinutes(app.end)
+                        }));
+
+                        // Subtract the busy times from the slots
+                        busyTimes.forEach(busy => {
+                            slots = slots.flatMap(slot => {
+                                if (busy.end <= slot.start || busy.start >= slot.end) {
+                                    // No overlap
+                                    return [slot];
+                                } else {
+                                    // Find the new free slots by cutting out the busy period
+                                    const newSlots = [];
+                                    if (busy.start > slot.start) {
+                                        newSlots.push({ start: slot.start, end: busy.start });
+                                    }
+                                    if (busy.end < slot.end) {
+                                        newSlots.push({ start: busy.end, end: slot.end });
+                                    }
+                                    return newSlots;
+                                }
+                            });
+                        });
+
+                        // Convert slots into 30 minute intervals
+                        const finalSlots = [];
+                        slots.forEach(slot => {
+                            for (let time = slot.start; time + 30 <= slot.end; time += 30) {
+                                finalSlots.push({ start: time, end: time + 30 });
+                            }
+                        });
+
+                        // Convert minutes back to HH:MM format
+                        const toTime = mins => `${Math.floor(mins / 60).toString().padStart(2, '0')}:${(mins % 60).toString().padStart(2, '0')}`;
+                        const freeSlots = finalSlots.map(slot => ({
+                            start: toTime(slot.start),
+                            end: toTime(slot.end)
+                        }));
+
+                        // check if user is found
+                        if(freeSlots.length > 0){
+                            // return the requests data
+                            return Response.json({status: 200, message:'Data found!', data: freeSlots}, {status: 200})
+
+                        }
+                        else {
+                            // user doesn't exist in the system
+                            return Response.json({status: 404, message:'No free slots available!'}, {status: 200})
+                        }
                     }
                 }
 
@@ -72,7 +133,7 @@ export async function GET(request,{params}) {
 
                         query = 'SELECT day,startTime,endTime FROM psych_calendar WHERE collegeId = "'+params.ids[3]+'"';
                         
-                        console.log(query);
+                        // console.log(query);
                         const [rows, fields] = await connection.execute(query);
                         connection.release();
 
@@ -122,7 +183,7 @@ export async function GET(request,{params}) {
                         // query1 = 'SELECT * FROM psych_results where assessmentId = "'+params.ids[3]+'"';
                         
                         const requests = params.ids[4];
-                        console.log(requests);
+                        // console.log(requests);
                         const requestData = JSON.parse(requests)
                         // Function to process requests
 
@@ -169,7 +230,7 @@ export async function GET(request,{params}) {
                         // check what type of requests to be shown
                         query2 = 'DELETE FROM psych_calendar where collegeId = "'+params.ids[3]+'" AND day = "'+params.ids[4]+'" AND startTime = "'+params.ids[5]+'" AND endTime = "'+params.ids[6]+'" ';
                         
-                        console.log(query2);
+                        // console.log(query2);
                         const [rows1, fields1] = await connection.execute(query2);
                         connection.release();
 
@@ -191,12 +252,12 @@ export async function GET(request,{params}) {
                         const [rows1, fields1] = await connection.execute(query, [params.ids[3], params.ids[4], params.ids[5], params.ids[6]])
                             connection.release();
                             if (rows1.affectedRows > 0) {
-                                console.log('Insert success');
+                                // console.log('Insert success');
                                 return Response.json({status: 200, message:'Slot removed!'}, {status: 200})
                                 
                             }
                             else {
-                                console.log('Failed to insert data:');
+                                // console.log('Failed to insert data:');
                                 return Response.json({status: 404, message:'Data not inserted!'}, {status: 200})
                             }
 

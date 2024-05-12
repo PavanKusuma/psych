@@ -7,8 +7,8 @@ export const metadata = {
 
 export default function PrivacyLayout({ children }) {
   return (
-    <div>
-      <div>Hello</div>
+    <div style={{margin: '40px'}}>
+      <div>Privacy Terms</div>
       <div>{children}</div>
     </div>
   )

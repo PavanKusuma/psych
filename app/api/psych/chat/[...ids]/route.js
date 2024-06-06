@@ -63,7 +63,7 @@ export async function GET(request,{params}) {
                   }
                   else if(params.ids[1] == 'S3'){
                       // get the messages of user
-                      const query1 = `select * from psych_chat where collegeId=? ORDER BY sentAt ASC LIMIT 20 OFFSET ?`;
+                      const query1 = `select * from psych_chat where collegeId=? ORDER BY sentAt DESC LIMIT 20 OFFSET ?`;
                       
                       const [rows1, fields1] = await connection.execute(query1, [params.ids[2], params.ids[3]]);
                       connection.release();
@@ -80,7 +80,7 @@ export async function GET(request,{params}) {
                   }
                   else if(params.ids[1] == 'S4'){
                       // get the messages of user by admin
-                      const query1 = `select collegeId,MAX(sentAt) as sentAt from psych_chat where (adminId LIKE ? OR adminId = '-') GROUP BY collegeId ORDER BY sentAt ASC LIMIT 20 OFFSET ?`;
+                      const query1 = `select collegeId,MAX(sentAt) as sentAt from psych_chat where (adminId LIKE ? OR adminId = '-') GROUP BY collegeId ORDER BY sentAt DESC LIMIT 20 OFFSET ?`;
                       // const query1 = `select collegeId,MAX(sentAt) as sentAt from psych_chat where adminId LIKE ? GROUP BY collegeId ORDER BY sentAt ASC LIMIT 20 OFFSET ?`;
                                             
                       const [rows1, fields1] = await connection.execute(query1, ["%"+params.ids[2]+"%", params.ids[3]]);

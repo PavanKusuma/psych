@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 import Toast from './toast';
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import { Label } from '../ui/label'
 import Link from 'next/link'
 
 // declare the apis of this page
@@ -329,6 +330,14 @@ function verifyOTP(){
     // }
   }
 
+  function navigateToPrivacy(){
+    router.push('/privacy')
+  }
+
+  function navigateToSupport(){
+    router.push('/support')
+  }
+
   
   return (
     // based on the available list, show the Load more CTA 
@@ -449,11 +458,12 @@ function verifyOTP(){
             
             {(resultMessage.length > 0) ? <Toast type={resultType} message={resultMessage} /> : ''}
 
-            <div className={`${dmSans.className} ${styles.text2}`}>
-                <Link href={{pathname: '/privacy',}} 
-                      className="underline text-slate-700">Privacy</Link>
-                <Link href={{pathname: '/other',}} 
-                      className="underline text-slate-700">Terms</Link>
+            <div className="flex flex-row gap-4 font-normal text-stone-500">
+            <Label onClick={navigateToPrivacy.bind(this)} className={`${dmSans.className}`} style={{cursor:'pointer'}} >Privacy</Label>
+            <Label onClick={navigateToSupport.bind(this)} className={`${dmSans.className}`} style={{cursor:'pointer'}} >Support</Label>
+                {/* <Link href={{pathname: '/privacy',}} 
+                      className="underline text-slate-700">Privacy</Link> */}
+                
             </div>
 
             </div>

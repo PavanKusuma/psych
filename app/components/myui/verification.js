@@ -457,7 +457,7 @@ function verifyOTP(){
             
             
             {(resultMessage.length > 0) ? <Toast type={resultType} message={resultMessage} /> : ''}
-
+<br/>
             <div className="flex flex-row gap-4 font-normal text-stone-500">
             <Label onClick={navigateToPrivacy.bind(this)} className={`${dmSans.className}`} style={{cursor:'pointer'}} >Privacy</Label>
             <Label onClick={navigateToSupport.bind(this)} className={`${dmSans.className}`} style={{cursor:'pointer'}} >Support</Label>

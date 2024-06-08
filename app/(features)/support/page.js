@@ -31,20 +31,20 @@ export default function PrivacyPolicy() {
         <p className="font-semibold text-l text-zinc-900">Download and Installation</p>
           <ul class="list-disc">
             <li>Visit the App Store or Google Play Store.</li>
-            <li>Search for "Dear Me" and click on the app icon.</li>
-            <li>Tap "Install" and wait for the app to download and install on your device.</li>
+            <li>Search for Dear Me and click on the app icon.</li>
+            <li>Tap Install and wait for the app to download and install on your device.</li>
           </ul>
           <br/>
         <p className="font-semibold text-l text-zinc-900">Creating an Account</p>
           <ul class="list-disc">
-            <li>Open the app and select 'Get started'.</li>
+            <li>Open the app and select Get started.</li>
             <li>Fill in the required fields with your information using OTP based authentication.</li>
             <li>Verify your college registered Id to activate your account.</li>
           </ul>
           <br/>
         <p className="font-semibold text-l text-zinc-900">First Steps</p>
           <ul class="list-disc">
-            <li>Upon logging in, follow the experience to familiarize yourself with the app’s layout.</li>
+            <li>Upon logging in, follow the experience to familiarize yourself with the app layout.</li>
             <li>Explore the dashboard and access initial features like setting up your first mood monitor.</li>
           </ul>
 
@@ -57,7 +57,7 @@ export default function PrivacyPolicy() {
           
 
           <br/>
-        <p className="font-bold text-l text-zinc-900">3. Tips for Using 'Dear Me'</p>
+        <p className="font-bold text-l text-zinc-900">3. Tips for Using Dear Me</p>
         <br/>
         <p className="font-semibold text-l text-zinc-900">How to use the app effectively for personal growth?</p>
         <br/>
@@ -84,7 +84,7 @@ export default function PrivacyPolicy() {
       
         <p className="font-bold text-l text-zinc-900">Conclusion</p>
         <br/>
-        <p>We're here to assist you on your journey with "Dear Me". We value your commitment to mental health journey and are excited to be a part of your journey.</p>
+        <p>We are here to assist you on your journey with Dear Me app. We value your commitment to mental health journey and are excited to be a part of your journey.</p>
         <br/>
 
       

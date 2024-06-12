@@ -76,7 +76,12 @@ export default function PrivacyPolicy() {
         <p>All personal data is encrypted and stored securely. Our comprehensive privacy policy details how we handle your information.</p>
         <br/>
       
-        <p className="font-bold text-l text-zinc-900">5. Contact Us</p>
+        <p className="font-bold text-l text-zinc-900">5. Account and Data Deletion</p>
+        <br/>
+        <p>Please write to piltovrindia@gmail.com to request for deleting your account+data associated with it or just some or all data associated with yor account. We would revert in 24 hours to resolve the same.</p>
+        <br/>
+      
+        <p className="font-bold text-l text-zinc-900">6. Contact Us</p>
         <br/>
         <p>Email: <a href="mailto:piltovrindia@gmail.com">piltovrindia@gmail.com</a></p>
         <p>Follow us on instagram for updates and community engagement.</p>

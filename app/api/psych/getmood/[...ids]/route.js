@@ -31,7 +31,10 @@ export async function GET(request,{params}) {
                     // if(params.ids[4] == 'All') {
 
                         // get the feelings for specific emotion
-                        query = 'SELECT * FROM psych_mood WHERE YEAR(createdOn) = '+params.ids[5]+' AND MONTH(createdOn) = '+params.ids[6]+' AND collegeId = "'+params.ids[4]+'" ORDER BY createdOn ASC';
+                        query = 'SELECT * FROM psych_mood WHERE collegeId = "'+params.ids[4]+'" ORDER BY id ASC LIMIT 30 OFFSET 0';
+                        
+                        // get the feelings for specific emotion for a given year and month
+                        // query = 'SELECT * FROM psych_mood WHERE YEAR(createdOn) = '+params.ids[5]+' AND MONTH(createdOn) = '+params.ids[6]+' AND collegeId = "'+params.ids[4]+'" ORDER BY createdOn ASC';
                         
                     // }
                     // else {

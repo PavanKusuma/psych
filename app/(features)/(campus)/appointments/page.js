@@ -394,9 +394,9 @@ export default function Appointments() {
                 setUser(obj)
                 
                 if(!completed){
-                    getCampusesData();
-                    getHostelsData();
-                    getHostelWiseStrengthsData();
+                    // getCampusesData();
+                    // getHostelsData();
+                    // getHostelWiseStrengthsData();
                     // getData();
                     // getDataDetails();
                     getAllRequests(currentStatus, initialDatesValues.from,initialDatesValues.to);

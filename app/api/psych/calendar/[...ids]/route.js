@@ -31,7 +31,8 @@ export async function GET(request,{params}) {
 
                     // Get the list of available admins who have marked their calendar
                     if(params.ids[2] == 1){
-                        let query = 'SELECT DISTINCT(p.collegeId),u.username,u.userImage FROM `psych_calendar` p JOIN users u ON p.collegeId=u.collegeId';
+                        let query = 'SELECT collegeId,username,userImage,gcm_regId FROM users WHERE role="PsychAdmin" AND campusId LIKE "%'+params.ids[4]+'%"';
+                        // let query = 'SELECT DISTINCT(p.collegeId),u.username,u.userImage FROM `psych_calendar` p JOIN users u ON p.collegeId=u.collegeId';
                         const [rows1, fields1] = await connection.execute(query);
                         connection.release();
                         // check if user is found
@@ -53,8 +54,10 @@ export async function GET(request,{params}) {
                         let query1 = '';
                         let query2 = '';
                         query1 = 'SELECT startTime as start, endTime as end FROM `psych_calendar` WHERE collegeId="'+params.ids[3]+'" AND day="'+params.ids[4]+'"';
-                        query2 = 'SELECT startTime as start, endTime as end FROM `psych_appointment` WHERE adminId="'+params.ids[3]+'" AND DATE(requestDate) = "'+params.ids[5]+'" AND requestStatus="Confirmed" AND isOpen=1';
+                        query2 = 'SELECT startTime as start, endTime as end FROM `psych_appointment` WHERE adminId="'+params.ids[3]+'" AND DATE(requestDate) = "'+params.ids[5]+'" AND requestStatus IN ("Confirmed","Submitted") AND isOpen=1';
                     
+console.log(query1);
+console.log(query2);
 
                         const [rows, fields] = await connection.execute(query1);
                         const [rows1, fields1] = await connection.execute(query2);

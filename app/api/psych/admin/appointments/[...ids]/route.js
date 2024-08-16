@@ -58,29 +58,69 @@ export async function GET(request,{params}) {
                         let query2 = '';
 
                         // get the unassigned appointments by campus
-                        if(params.ids[6] == 'All'){ // check if we need to call all campuses data or specific campus
-                            // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                            query1 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.requestStatus = "'+params.ids[3]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                            // get the assigned appointments by campus
-                            // query2 = 'SELECT * FROM psych_appointment WHERE adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
-                            query2 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.adminId = "'+params.ids[5]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
+                        // if(params.ids[6] == 'All'){ // check if we need to call all campuses data or specific campus
+                        //     // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                        //     query1 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.requestStatus = "'+params.ids[3]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                        //     // get the assigned appointments by campus
+                        //     // query2 = 'SELECT * FROM psych_appointment WHERE adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
+                        //     query2 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.adminId = "'+params.ids[5]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];    
+                        // }
+                        // else {
+                        //     // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" AND campusId = "'+params.ids[6]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                        //     query1 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.requestStatus = "'+params.ids[3]+'" AND a.campusId = "'+params.ids[6]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                        //     // get the assigned appointments by campus
+                        //     // query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                        //     query2 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.campusId = "'+params.ids[6]+'" AND a.adminId = "'+params.ids[5]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                        // }
+
+                        if(params.ids[6] != 'All'){
+
+                            const campusIds = params.ids[6].split(',');
+
+                            // check if there are more than 1 campus
+                            var conditionsString = '';
+                            var whr = '';
+                                // check if campuses are present
+                                if(campusIds.length > 0) {
+                                    
+                                    if(campusIds.length > 1){
+
+                                        // Build the LIKE conditions with case sensitivity
+                                        let likeConditions = campusIds.map(campusId => `BINARY a.campusId LIKE '%${campusId}%'`);
+
+                                        // Join the conditions with OR
+                                        conditionsString = likeConditions.join(' OR ');
+                                        // conditionsString = conditionsString + ') ';
+                                    }
+                                    else {
+                                        conditionsString = `BINARY a.campusId LIKE '%${campusIds}%'`;
+                                    }
+
+                                    whr = whr + conditionsString;
+                                }
+                                
+                                // this is by admin and campus
+                                query1 = `SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.adminId="`+params.ids[5]+`" AND a.requestStatus = "`+params.ids[3]+`" AND (${conditionsString}) ORDER BY a.createdOn DESC LIMIT 50 OFFSET `+params.ids[4];
+                                
                         }
                         else {
-                            // query1 = 'SELECT * FROM psych_appointment WHERE requestStatus = "'+params.ids[3]+'" AND campusId = "'+params.ids[6]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                            query1 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.requestStatus = "'+params.ids[3]+'" AND a.campusId = "'+params.ids[6]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                            // get the assigned appointments by campus
-                            // query2 = 'SELECT * FROM psych_appointment WHERE campusId = "'+params.ids[6]+'" AND adminId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
-                            query2 = 'SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.campusId = "'+params.ids[6]+'" AND a.adminId = "'+params.ids[5]+'" ORDER BY a.createdOn DESC LIMIT 50 OFFSET '+params.ids[4];
+                            query1 = `SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.adminId="`+params.ids[5]+`" AND a.requestStatus = "`+params.ids[3]+`" ORDER BY a.createdOn DESC LIMIT 50 OFFSET `+params.ids[4];
+                            // this is just by admin
+                            // query1 = `SELECT * FROM psych_appointment WHERE adminId="`+params.ids[5]+`" ORDER BY createdOn DESC LIMIT 50 OFFSET `+params.ids[4];
+                                
                         }
+                        
                     
                         const [rows1, fields1] = await connection.execute(query1);
-                        const [rows2, fields2] = await connection.execute(query2);
+                        // const [rows2, fields2] = await connection.execute(query2);
                         connection.release();
                     
                         // check if user is found
-                        if(rows2.length > 0 || rows1.length > 0){
+                        if(rows1.length > 0){
+                        // if(rows2.length > 0 || rows1.length > 0){
                             // return the requests data
-                            return Response.json({status: 200, message:'Data found!', newdata: rows1, olddata: rows2}, {status: 200})
+                            return Response.json({status: 200, message:'Data found!', newdata: rows1}, {status: 200})
+                            // return Response.json({status: 200, message:'Data found!', newdata: rows1, olddata: rows2}, {status: 200})
 
                         }
                         else {

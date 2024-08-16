@@ -582,7 +582,7 @@ async function declineAppointment(row){
                 : null }
                 </div>
               
-          
+           
           {/* : <br/>} */}
           {/* <Button variant="outline" onClick={()=>downloadNow()}> <ArrowDown className="mr-2 h-4 w-4"/> Download</Button> */}
         </div>

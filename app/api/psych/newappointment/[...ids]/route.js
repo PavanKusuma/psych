@@ -39,7 +39,7 @@ export async function GET(request,{params}) {
                         // create query for insert
                         const q = 'INSERT INTO psych_appointment (appointmentId, collegeId, adminId, adminName, topic, description, requestDate, startTime, endTime, isOpen, requestStatus, notes, mode, createdOn, updatedOn, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
                         // create new request
-                        const [rows, fields] = await connection.execute(q, [ params.ids[1], params.ids[2], '-', '-', params.ids[3], decodeURIComponent(params.ids[4]), params.ids[5], params.ids[6],params.ids[7], 1,  "Submitted", "-", params.ids[8], currentDate, currentDate, params.ids[9]]);
+                        const [rows, fields] = await connection.execute(q, [ params.ids[1], params.ids[2], params.ids[3], params.ids[4], params.ids[5], decodeURIComponent(params.ids[6]), params.ids[7], params.ids[8],params.ids[9], 1,  "Submitted", "-", params.ids[10], currentDate, currentDate, params.ids[11]]);
                         connection.release();
 
                         // get the gcm_regIds of SuperAdmin and branch admin to notify
@@ -56,14 +56,14 @@ export async function GET(request,{params}) {
                         // // var gcmIds = 
                         // // console.log(gcmIds);
 
-                        // // send the notification
-                        // const notificationResult = await send_notification('New appointment request received!', gcmIds, 'Multiple');
+                        // send the notification
+                        const notificationResult = await send_notification('New appointment request received!', params.ids[12], 'Single');
                             
-                        // // return successful update
-                        // return Response.json({status: 200, message:'Request submitted and waiting for confirmation!', notification: notificationResult}, {status: 200})
+                        // return successful update
+                        return Response.json({status: 200, message:'Request submitted!', notification: notificationResult}, {status: 200})
 
-                        // return the user data
-                        return Response.json({status: 200, message:'Request submitted!'}, {status: 200})                   
+                        // // return the user data
+                        // return Response.json({status: 200, message:'Request submitted!'}, {status: 200})                   
                       
                     }
                     else {

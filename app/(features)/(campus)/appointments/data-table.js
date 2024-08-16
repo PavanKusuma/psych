@@ -59,7 +59,7 @@ import {
   TooltipTrigger,
 } from "@/app/components/ui/tooltip"
 import Biscuits from 'universal-cookie'
-
+ 
 
 
 export function DataTable({ data, status, changeStatus, downloadNow, initialDates, dates, requestAgain, loadingIds, removeAppointment, handleAcceptClick, handleCompleteClick, handleCancelClick, handleTimeUpdateClick }) {
@@ -106,15 +106,19 @@ const columns = [
     enableSorting: false,
     enableHiding: false,
   },
+  
     {
+      size: 250,
       accessorKey: "collegeId",
       header: "Student",
       cell: ({ row }) => {
-        return <div className="flex w-[100px] px-2 py-1 text-md focus:outline-none text-foreground"
+        return <div className="flex w-fit px-2 py-1 text-md focus:outline-none text-foreground"
         style={{cursor:'pointer'}}>
                  
                  <Sheet>
-                  <SheetTrigger className="text-green-700 underline underline-offset-4 text-md text-foreground">{ row.getValue("collegeId")}</SheetTrigger>
+                  <SheetTrigger className="text-green-700 underline underline-offset-4 text-md text-foreground flex space-x-2">
+                    {row.getValue("username")} - {row.getValue("collegeId")}
+                  </SheetTrigger>
                   <SheetContent>
                     <SheetHeader>
                       <SheetTitle>{row.getValue("username")}</SheetTitle>
@@ -151,7 +155,6 @@ const columns = [
                   </SheetContent>
                 </Sheet>
 
-                  
                 </div>
       },
     },

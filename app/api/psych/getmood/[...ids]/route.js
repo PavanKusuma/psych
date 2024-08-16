@@ -28,19 +28,23 @@ export async function GET(request,{params}) {
                 let query = '';
                 if(params.ids[1] == 'Student') {
 
-                    // if(params.ids[4] == 'All') {
+                    if(params.ids[2] == 'M1') {
 
                         // get the feelings for specific emotion
-                        query = 'SELECT * FROM psych_mood WHERE collegeId = "'+params.ids[4]+'" ORDER BY id ASC LIMIT 30 OFFSET 0';
+                        query = 'SELECT * FROM psych_mood WHERE collegeId = "'+params.ids[3]+'" ORDER BY id ASC LIMIT 30 OFFSET '+params.ids[4];
                         
+                    }
+                    else if(params.ids[2] == 'M2') {
+                        // get the feelings for specific emotion
+                        query = 'SELECT DATE(createdOn) AS `Date`, SUM(CASE WHEN emotion = "MoreHappy" THEN 1 ELSE 0 END) AS MoreHappy, SUM(CASE WHEN emotion = "Happy" THEN 1 ELSE 0 END) AS Happy, SUM(CASE WHEN emotion = "Sad" THEN 1 ELSE 0 END) AS Sad, SUM(CASE WHEN emotion = "Fear" THEN 1 ELSE 0 END) AS Fear FROM psych_mood WHERE collegeId="'+params.ids[3]+'" GROUP BY DATE(createdOn) ORDER BY DATE(createdOn) ASC';
+                        // // get the feelings for specific emotion
+                        // query = 'SELECT title,description,media FROM psych_mood where FIND_IN_SET("'+params.ids[4]+'", feeling) > 0 ORDER BY createdDate ASC LIMIT 50 OFFSET '+params.ids[2];
+                    }
+                    else if(params.ids[2] == 'M3') {
                         // get the feelings for specific emotion for a given year and month
-                        // query = 'SELECT * FROM psych_mood WHERE YEAR(createdOn) = '+params.ids[5]+' AND MONTH(createdOn) = '+params.ids[6]+' AND collegeId = "'+params.ids[4]+'" ORDER BY createdOn ASC';
+                        query = 'SELECT * FROM psych_mood WHERE YEAR(createdOn) = '+params.ids[5]+' AND MONTH(createdOn) = '+params.ids[6]+' AND collegeId = "'+params.ids[3]+'" ORDER BY createdOn ASC';
                         
-                    // }
-                    // else {
-                    //     // get the feelings for specific emotion
-                    //     query = 'SELECT title,description,media FROM psych_mood where FIND_IN_SET("'+params.ids[4]+'", feeling) > 0 ORDER BY createdDate ASC LIMIT 50 OFFSET '+params.ids[2];
-                    // }
+                    }
 
                 }
                 else {

@@ -39,6 +39,11 @@ import styles from '../../../../app/page.module.css'
 // }
 
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 import { ArrowUpDown, MoreHorizontal } from "lucide-react" 
 import { Checkbox } from "@/app/components/ui/checkbox"
@@ -214,7 +219,7 @@ const columns = [
         )
       },
       cell: ({ row }) => {
-        return <div>{dayjs(row.getValue("requestDate")).format("DD-MMM'YY hh:mm A")}</div>
+        return <div>{dayjs(row.getValue("requestDate")).tz('Asia/Kolkata').format("DD-MMM'YY hh:mm A")}</div>
         // return <div>{dayjs(row.getValue("requestDate")).format("DD/MM/YY hh:mm A")}</div>
       },
     },

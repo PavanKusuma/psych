@@ -177,7 +177,7 @@ import { Toaster } from "@/app/components/ui/toaster"
               
               {userData ?
               <div className={styles.verticalsection} style={{gap:'8px',padding: '8px',backgroundColor: '#f0f0f0',border: '1px solid #e5e5e5',borderRadius: '8px'}}>
-                  <p className={`${inter.className} ${styles.text3}  ${styles.tag}`} style={{cursor:'pointer'}} >{userData.role}</p>
+                  {/* <p className={`${inter.className} ${styles.text3}  ${styles.tag}`} style={{cursor:'pointer'}} >{userData.role}</p> */}
                   <p className={`${inter.className} ${styles.text1}`} style={{cursor:'pointer'}} >{userData.username}</p>
                   <p onClick={clearCookies.bind(this)} className={`${inter.className} ${styles.text2}`} style={{cursor:'pointer'}} >Log out</p>
               </div>

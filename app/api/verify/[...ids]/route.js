@@ -119,7 +119,7 @@ export async function GET(request,{params}) {
             }
             else {
                 // user doesn't exist in the system
-                return Response.json({status: 404, message:'This Regd.No does not match with any campus records!'}, {status: 200})
+                return Response.json({status: 404, message:'This Regd.No does not have access yet or match with any campus records! Contact Psychology Department to get access.'}, {status: 200})
             }
         }
         else {

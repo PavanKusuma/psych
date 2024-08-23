@@ -278,7 +278,7 @@ function verifyOTP(){
             
             // save the data to local cookie
             let jsonString = JSON.stringify(queryResult.data)
-            biscuits.set('sc_user_detail', encodeURIComponent(jsonString), {path: '/', expires: new Date(Date.now() + 10800000)})
+            biscuits.set('sc_user_detail', encodeURIComponent(jsonString), {path: '/', expires: new Date(Date.now() + 43200000)})
             
             // navigate to dashboard
             // router.push('/dashboard')

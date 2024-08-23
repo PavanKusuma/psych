@@ -99,7 +99,7 @@ export default function Calendar() {
     const [resultMessage, setResultMessage] = useState('');
 
     const [dataFound, setDataFound] = useState(true); 
-    const [searching, setSearching] = useState(false);
+    const [searching, setSearching] = useState(true);
 
     const [outingData, setOutingData] = useState();
     const [allRequests, setAllRequests] = useState([]);
@@ -232,13 +232,14 @@ export default function Calendar() {
         try {    
             
             // const result  = await getTimeSlotsDataAPI(process.env.NEXT_PUBLIC_API_PASS, 
-            // console.log("/api/psych/calendar/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/1/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+offset);
+            console.log("/api/psych/calendar/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/1/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+offset);
             const result  = await getAllSlotsAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId,  offset, )
+            
             
             // const result  = await getTimeSlotsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, status, 0, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId, 'CSE,IT', 'All', '111', '0', JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).campusId, dates, 'BTECH-IT-2,BTECH-IT-3')
             const queryResult = await result.json() // get data
 
-            // console.log(queryResult);
+            console.log(queryResult);
             // check for the status
             if(queryResult.status == 200){
 
@@ -290,13 +291,13 @@ export default function Calendar() {
             }
             else if(queryResult.status == 404) {
                 setAllRequests([]);
-                toast({
-                    description: "No more requests with "+status+" status",
-                  })
-                  
+                // toast({
+                //     description: "No more requests with "+status+" status",
+                //   })
+                setUnavailableSlots(unavailableSlots1);
                 setSearching(false);
-                setDataFound(false);
-                setCompleted(true);
+                setDataFound(true);
+                setCompleted(false);
             }
             else if(queryResult.status == 201) {
                 
@@ -330,7 +331,7 @@ const sendDataToServer = async () => {
 
         if (response.ok) {
             const result = await response.json();
-            console.log('Data saved:', result);
+            // console.log('Data saved:', result);
         } else {
             console.error('Failed to save data');
         }
@@ -353,23 +354,29 @@ const addSlotToDB = async (day) => {
 
         if (response.ok) {
             const result = await response.json();
-            console.log('Slot added', result);
-            
+            // console.log('Slot added', result);
+            if(allRequests.length == 0){
+                toast({description: "Slot added, Refresh to see the slot",});
+            }
+            else {
+                toast({description: "Slot added",});
+            }
+
             const newRequest = {"day": day, slots: [{"start": selectStartTime, "end": selectEndTime}]};
             setAllNewRequests([...allNewRequests, newRequest]); 
             setAllRequests([...allRequests, newRequest]); 
 
             setAddProgress(false);
-            toast({description: "Slot added",});
+            
         } else {
-            console.error('Failed to save data');
+            // console.error('Failed to save data');
             setAddProgress(false);
             toast({description: "Facing issues, try again",});
         }
     } catch (error) {
         setAddProgress(false);
         toast({description: "Facing issues, try again",});
-        console.error('Error sending data to server:', error);
+        // console.error('Error sending data to server:', error);
     }
 };
 
@@ -387,7 +394,7 @@ const removeSlotFromDB = async (day, start, end) => {
 
         if (response.ok) {
             const result = await response.json();
-            console.log('Slot removed', result);
+            // console.log('Slot removed', result);
             // setAllRequests(currentRequests => 
             //     currentRequests.filter(request => 
             //         !(request.day === day && request.slots.some(slot => slot.start === start && slot.end === end))
@@ -413,14 +420,14 @@ const removeSlotFromDB = async (day, start, end) => {
             setRemoveProgress(false);
             toast({description: "Slot removed",});
         } else {
-            console.error('Failed to save data');
+            // console.error('Failed to save data');
             setRemoveProgress(false);
             toast({description: "Facing issues, try again",});
         }
     } catch (error) {
         setRemoveProgress(false);
         toast({description: "Facing issues, try again",});
-        console.error('Error sending data to server:', error);
+        // console.error('Error sending data to server:', error);
     }
 };
 
@@ -477,7 +484,8 @@ const fomarttedTimeforMe = (timeStr) => {
             
             <div style={{display: 'flex',flexDirection:'column', alignItems: 'center',gap: '10px'}}>
                 
-            {(unavailableSlots.length > 0) ?
+            {(unavailableSlots.length >= 0) ?
+            
             <div>
                 {day.slots.map((slot, slotIndex) => (
 

@@ -219,7 +219,8 @@ const columns = [
         )
       },
       cell: ({ row }) => {
-        return <div>{dayjs(row.getValue("requestDate")).tz('Asia/Kolkata').format("DD-MMM'YY hh:mm A")}</div>
+        return <div>{dayjs(row.getValue("requestDate")).utcOffset(0).format("DD-MMM'YY hh:mm A")}</div>
+        // return <div>{dayjs(row.getValue("requestDate")).format("DD-MMM'YY hh:mm A")}, {dayjs(row.getValue("requestDate")).tz('Asia/Kolkata').format("DD-MMM'YY hh:mm A")}, {dayjs(row.getValue("requestDate")).utcOffset(0).format("DD-MMM'YY hh:mm A")}</div>
         // return <div>{dayjs(row.getValue("requestDate")).format("DD/MM/YY hh:mm A")}</div>
       },
     },

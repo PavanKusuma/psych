@@ -128,6 +128,7 @@ export async function GET(request,{params}) {
                             return Response.json({status: 404, message:'No new requests!'}, {status: 200})
                         }
                     }
+                    // get appointments of a specific student
                     else if(params.ids[2] == 'S2'){
                         
                         let query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];
@@ -146,6 +147,7 @@ export async function GET(request,{params}) {
                         }
                         
                     }
+                    // get all appointments
                     else if(params.ids[2] == 'S3'){
                         
                         let query = 'SELECT * FROM psych_appointment ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];

@@ -8,11 +8,11 @@ import dayjs from 'dayjs'
 // 4 collegeId - Super33
 
 
-                        // Convert time to minutes since midnight
-                        const toMinutes = time => {
-                            const [hour, minute] = time.split(':').map(Number);
-                            return hour * 60 + minute;
-                        };
+    // Convert time to minutes since midnight
+    const toMinutes = time => {
+        const [hour, minute] = time.split(':').map(Number);
+        return hour * 60 + minute;
+    };
 
 
 export async function GET(request,{params}) {
@@ -56,7 +56,7 @@ export async function GET(request,{params}) {
                         query1 = 'SELECT startTime as start, endTime as end FROM `psych_calendar` WHERE collegeId="'+params.ids[3]+'" AND day="'+params.ids[4]+'"';
                         query2 = 'SELECT startTime as start, endTime as end FROM `psych_appointment` WHERE adminId="'+params.ids[3]+'" AND DATE(requestDate) = "'+params.ids[5]+'" AND requestStatus IN ("Confirmed","Submitted") AND isOpen=1';
                     
-console.log(query1);
+console.log(query1); 
 console.log(query2);
 
                         const [rows, fields] = await connection.execute(query1);
@@ -69,6 +69,10 @@ console.log(query2);
 
                         // Prepare the slots and appointments
                         let slots = rows.map(time => ({
+                            start: toMinutes(time.start),
+                            end: toMinutes(time.end)
+                        }));
+                        let slots1 = rows.map(time => ({
                             start: toMinutes(time.start),
                             end: toMinutes(time.end)
                         }));
@@ -98,25 +102,39 @@ console.log(query2);
                             });
                         });
 
-                        // Convert slots into 30 minute intervals
-                        const finalSlots = [];
-                        slots.forEach(slot => {
-                            for (let time = slot.start; time + 30 <= slot.end; time += 30) {
-                                finalSlots.push({ start: time, end: time + 30 });
-                            }
-                        });
+                            // Calendar slots which are free from what admin has enabled
+                            // Convert slots into 30 minute intervals
+                            const finalSlots = [];
+                            slots.forEach(slot => {
+                                for (let time = slot.start; time + 30 <= slot.end; time += 30) {
+                                    finalSlots.push({ start: time, end: time + 30 });
+                                }
+                            });
+                            // Convert minutes back to HH:MM format
+                            const toTime = mins => `${Math.floor(mins / 60).toString().padStart(2, '0')}:${(mins % 60).toString().padStart(2, '0')}`;
+                            const freeSlots = finalSlots.map(slot => ({
+                                start: toTime(slot.start),
+                                end: toTime(slot.end)
+                            }));
 
-                        // Convert minutes back to HH:MM format
-                        const toTime = mins => `${Math.floor(mins / 60).toString().padStart(2, '0')}:${(mins % 60).toString().padStart(2, '0')}`;
-                        const freeSlots = finalSlots.map(slot => ({
-                            start: toTime(slot.start),
-                            end: toTime(slot.end)
-                        }));
+                            // Calendar slots enabled by admin
+                            // Convert slots into 30 minute intervals
+                            const freeSlots1 = [];
+                            slots1.forEach(slot => {
+                                for (let time = slot.start; time + 30 <= slot.end; time += 30) {
+                                    freeSlots1.push({ start: time, end: time + 30 });
+                                }
+                            });
+                            // Calendar slots enabled by admin
+                            const totalSlots = freeSlots1.map(slot => ({
+                                start: toTime(slot.start),
+                                end: toTime(slot.end)
+                            }));
 
                         // check if user is found
                         if(freeSlots.length > 0){
                             // return the requests data
-                            return Response.json({status: 200, message:'Data found!', data: freeSlots}, {status: 200})
+                            return Response.json({status: 200, message:'Data found!', data: freeSlots, data1: totalSlots}, {status: 200})
 
                         }
                         else {

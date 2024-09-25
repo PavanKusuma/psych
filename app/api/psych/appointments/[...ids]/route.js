@@ -129,6 +129,59 @@ export async function GET(request,{params}) {
                             return Response.json({status: 404, message:'No new requests!'}, {status: 200})
                         }
                     }
+                    if(params.ids[2] == 'S1.1'){
+
+                        // verify what type of requests admin is asking
+                        let query1 = '';
+
+                        if(params.ids[6] != 'All'){
+
+                            const campusIds = params.ids[6].split(',');
+
+                            // check if there are more than 1 campus
+                            var conditionsString = '';
+                            var whr = '';
+                                // check if campuses are present
+                                if(campusIds.length > 0) {
+                                    
+                                    if(campusIds.length > 1){
+
+                                        // Build the LIKE conditions with case sensitivity
+                                        let likeConditions = campusIds.map(campusId => `BINARY a.campusId LIKE '%${campusId}%'`);
+
+                                        // Join the conditions with OR
+                                        conditionsString = likeConditions.join(' OR ');
+                                        // conditionsString = conditionsString + ') ';
+                                    }
+                                    else {
+                                        conditionsString = `BINARY a.campusId LIKE '%${campusIds}%'`;
+                                    }
+
+                                    whr = whr + conditionsString;
+                                }
+                                
+                                // this is by admin and campus
+                                query1 = `SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.adminId="`+params.ids[5]+`" AND (${conditionsString}) and a.requestStatus IN ('Submitted','Confirmed') ORDER BY a.requestDate DESC LIMIT 50 OFFSET `+params.ids[4];
+                                
+                        }
+                        else {
+                            // this is just by admin
+                            query1 = `SELECT a.*,u.username,u.email,u.phoneNumber,u.course,u.branch,u.year,u.gender FROM psych_appointment a JOIN users u ON a.collegeId=u.collegeId WHERE a.adminId="`+params.ids[5]+`" and a.requestStatus IN ('Submitted','Confirmed') ORDER BY a.requestDate DESC LIMIT 50 OFFSET `+params.ids[4];
+                        }
+                        
+                        const [rows1, fields1] = await connection.execute(query1);
+                        connection.release();
+                    
+                        // check if user is found
+                        if(rows1.length > 0){
+                            // return the requests data
+                            return Response.json({status: 200, message:'Data found!', data: rows1}, {status: 200})
+                        }
+                        else {
+                            // user doesn't exist in the system
+                            return Response.json({status: 404, message:'No new requests!'}, {status: 200})
+                        }
+                    }
                     else if(params.ids[2] == 'S2'){ // get all the appointments of a student
                         
                         let query = 'SELECT * FROM psych_appointment WHERE collegeId = "'+params.ids[5]+'" ORDER BY requestDate ASC LIMIT 50 OFFSET '+params.ids[4];

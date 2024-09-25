@@ -66,77 +66,17 @@ import {
 import Biscuits from 'universal-cookie'
  
 
-  // get the list of messages sent and received by a person to the admin
-  const getAppointmentsOfStudentData = async (pass, studentId, campusId) => 
-    fetch("/api/psych/appointments/"+pass+"/PsychAdmin/S2/All/0/"+studentId, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-    });
     
     
 
-export function DataTable({ data, status, changeStatus, downloadNow, initialDates, dates, requestAgain, loadingIds, removeAppointment, handleAcceptClick, handleCompleteClick, handleCancelClick, handleTimeUpdateClick }) {
+export function DataTable({ data, status, changeStatus, changeSelectedStudent, downloadNow, initialDates, dates, requestAgain, loadingIds, removeAppointment, handleAcceptClick, handleCompleteClick, handleCancelClick, handleTimeUpdateClick }) {
 
   // const [loadingIds, setLoadingIds] = useState(loadingIds);
 
   const today = new dayjs();
   const { toast } = useToast();
   const textareaRef = useRef(null); // Creates a ref object
-  const [studentAppointmentsList, setStudentAppointmentsList] = useState([]);
-      
-    var dataFound= true; 
-    var searchingAppointments = false;
-    
-    // get appointments of a specific receiver
-    async function getAppointmentsOfStudent(studentId){
-          console.log(studentId);
-          
-      searchingAppointments= true;
-      // setSenderMessagesList([]);
-      // setOffset(offset+10); // update the offset for every call
   
-      try {    
-          const result  = await getAppointmentsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
-          const queryResult = await result.json() // get data
-          console.log(queryResult);
-          // check for the status
-          if(queryResult.status == 200){
-  
-              // check if data exits
-              if(queryResult.data.length > 0){
-                  
-                  // get the messages list of the receiver
-                  setStudentAppointmentsList(queryResult.data);
-                  
-                  dataFound =true;
-                  searchingAppointments = false;
-              }
-              else {
-                  
-                  dataFound=false;
-              }
-              // setCompleted(false);
-          }
-          else {
-              
-              searchingAppointments=false;
-              dataFound=false;
-              // setCompleted(true);
-          }
-      }
-      catch (e){
-          // show and hide message
-          // setResultType('error');
-          // setResultMessage('Issue loading. Please refresh or try again later!');
-          // setTimeout(function(){
-          //     setResultType('');
-          //     setResultMessage('');
-          // }, 3000);
-      }
-  }
 
 
   const handleNotesSaveChanges = (row) => {
@@ -184,7 +124,8 @@ const columns = [
         style={{cursor:'pointer'}}>
                  
                  <Sheet>
-                  <SheetTrigger className="text-green-700 underline underline-offset-4 text-md text-foreground flex space-x-2" onClick={()=>getAppointmentsOfStudent(row.getValue("collegeId"))}>
+                  <SheetTrigger className="text-green-700 underline underline-offset-4 text-md text-foreground flex space-x-2" onClick={()=>changeSelectedStudent(row)}>
+                  {/* <SheetTrigger className="text-green-700 underline underline-offset-4 text-md text-foreground flex space-x-2" onClick={()=>getAppointmentsOfStudent(row.getValue("collegeId"))}> */}
                     {row.getValue("username")} - {row.getValue("collegeId")}
                   </SheetTrigger>
                   <SheetContent>
@@ -217,18 +158,6 @@ const columns = [
                             <p className="text-black-700 text-md ont-semibold text-foreground">{ row.getValue("phoneNumber")}</p>
                         </div>
                         <Separator />
-
-                        {searchingAppointments ? <div className={styles.horizontalsection}>
-                              <SpinnerGap className={`${styles.icon} ${styles.load}`} />
-                              <p className={`${inter.className} ${styles.text3}`}>Fetching appointments data ...</p> 
-                          </div> : ''}
-                          
-                          <div>
-                          {
-                            studentAppointmentsList.map((appointment) => 
-                              <div key={appointment.appointmentId} value={appointment.appointmentId}>{appointment.requestDate}</div>)
-                          }
-                          </div>
                         
 
                       </SheetDescription>

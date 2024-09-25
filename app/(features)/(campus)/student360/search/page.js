@@ -231,18 +231,6 @@ const [messagesList, setMessagesList] = useState([]); // List of message and dat
 
         <div className={styles.verticalsection} style={{height:'80vh',gap:'8px'}}>
 
-            <div style={{width:'100%',display:'flex', flexDirection:'row',justifyContent:'space-between'}}>
-                
-            
-                <div className={styles.horizontalsection}>
-                    <div className={`${styles.primarybtn} `} style={{display:'flex', flexDirection:'row', width:'fit-content', cursor:'pointer', gap:'4px'}}> 
-                        <Plus />
-                        <p className={`${inter.className}`}>Add student</p>
-                    </div>
-                    
-                </div>
-                
-            </div>
 
             <div className={styles.horizontalsection} style={{height:'100%', width:'100%'}}>
             

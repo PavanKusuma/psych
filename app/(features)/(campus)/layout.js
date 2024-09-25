@@ -108,9 +108,14 @@ import { Toaster } from "@/app/components/ui/toaster"
     }
     function navigateStudents(){
       // biscuits.set('selectedTab', 'Chat', {path: '/', expires: new Date(Date.now() + 10800000)})
-      setSelectedTab('Chat')
-      router.push('/student360/search')
+      setSelectedTab('Students')
+      router.push('/students')
     }
+    // function navigateStudents(){
+    //   // biscuits.set('selectedTab', 'Chat', {path: '/', expires: new Date(Date.now() + 10800000)})
+    //   setSelectedTab('Students')
+    //   router.push('/student360/search')
+    // }
     function navigateAppointments(){
       // biscuits.set('selectedTab', 'Chat', {path: '/', expires: new Date(Date.now() + 10800000)})
       setSelectedTab('Appointments')
@@ -166,6 +171,7 @@ import { Toaster } from "@/app/components/ui/toaster"
                 <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Appointments' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateAppointments.bind(this)} style={{cursor:'pointer', gap:'0px'}}><Clock className={styles.menuicon}/>Appointments</div>
                 <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Assessments' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateAssessments.bind(this)} style={{cursor:'pointer', gap:'0px'}}><PenNib className={styles.menuicon}/>Assessments</div>
                 <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Calendar' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateCalendar.bind(this)} style={{cursor:'pointer', gap:'0px'}}><Calendar className={styles.menuicon}/>Calendar</div>
+                <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Students' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateStudents.bind(this)} style={{cursor:'pointer', gap:'0px'}}><UserFocus className={styles.menuicon}/>Students</div>
                 {/* <div className={`${styles.horizontalsection} ${inter.className} ${styles.text2}`} style={{cursor:'pointer'}}><ArrowSquareOut className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Outing</div>
                 <div className={`${styles.horizontalsection} ${inter.className} ${styles.text2}`} style={{cursor:'pointer'}}><PresentationChart className={styles.menuicon} style={{backgroundColor: '#26379b'}}/> Reports</div> */}
                 {/* <div className={`${styles.horizontalsection} ${inter.className} ${selectedTab == 'Registration' ? styles.leftMenuItem_selected : styles.leftMenuItem} `} onClick={navigateRegistration.bind(this)} style={{cursor:'pointer'}}><UserPlus className={styles.menuicon}/> Registration</div> */}

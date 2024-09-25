@@ -39,7 +39,7 @@ export async function GET(request,{params}) {
                         // create query for insert
                         const q = 'INSERT INTO psych_appointment (appointmentId, collegeId, adminId, adminName, topic, description, requestDate, startTime, endTime, isOpen, requestStatus, notes, mode, createdOn, updatedOn, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
                         // create new request
-                        const [rows, fields] = await connection.execute(q, [ params.ids[1], params.ids[2], params.ids[3], params.ids[4], params.ids[5], decodeURIComponent(params.ids[6]), params.ids[7], params.ids[8],params.ids[9], 1,  "Submitted", "-", params.ids[10], currentDate, currentDate, params.ids[11]]);
+                        const [rows, fields] = await connection.execute(q, [ params.ids[1], params.ids[2], params.ids[3], params.ids[4], params.ids[5], decodeURIComponent(params.ids[6]), params.ids[7], params.ids[8],params.ids[9], 1,  "Submitted", "-", params.ids[10], params.ids[13], params.ids[13], params.ids[11]]);
                         connection.release();
 
                         // get the gcm_regIds of SuperAdmin and branch admin to notify

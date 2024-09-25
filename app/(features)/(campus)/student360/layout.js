@@ -56,7 +56,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 <div style={{height:'8vh',display:'flex',flexDirection:'column',justifyContent:'space-around'}}>
               {/* <h2 className={inter.className}>Student 360</h2> */}
-              <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">Anonymous chat requests</h1>
+              <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">Students</h1>
           </div>
         {/* <div className={styles.maindivcenter} style={{height:'90vh', contentVisibility:'auto',padding: '0px 24px'}}>
             

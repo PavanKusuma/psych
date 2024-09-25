@@ -25,6 +25,7 @@ const dmSerifText = DM_Serif_Text({weight: "400", subsets: ['latin'] })
 import { Check, Info, SpinnerGap, X, Plus, ArrowBendUpLeft, Watch, MapPin } from 'phosphor-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from "recharts"
+import { Input } from '@/app/components/ui/input';
 import {
     ChartContainer,
     ChartLegend,
@@ -32,7 +33,7 @@ import {
     ChartTooltip,
     ChartTooltipContent,
   } from "@/app/components/ui/chart"
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs"
 export const description = "A stacked bar chart with a legend"
 // const chartData = [
 //   { month: "January", fear: 186, mobile: 80 },
@@ -71,6 +72,11 @@ import styles from '../../../../app/page.module.css'
 import Biscuits from 'universal-cookie'
 const biscuits = new Biscuits
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import { useRouter } from 'next/navigation'
 // import ImageWithShimmer from '../../components/imagewithshimmer'
 
@@ -94,8 +100,8 @@ import {
     TableRow,
   } from "@/app/components/ui/table"
   
-import {columns} from "./columns"
-import {DataTable} from "./data-table"
+// import {columns} from "./columns"
+// import {DataTable} from "./data-table"
 import { Card, CardContent,
     CardDescription,
     CardFooter,
@@ -142,6 +148,16 @@ fetch("/api/psych/admin/appointments/"+pass+"/"+role+"/S1/"+statuses+"/"+offset+
     },
 });
 
+
+  // get the appointments taken so far by student
+  const getBasicStudentData = async (pass, studentId) => 
+    fetch("/api/user/"+pass+"/U2/"+studentId, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+    });
 
   // get the appointments taken so far by student
   const getAppointmentsOfStudentData = async (pass, studentId, campusId) => 
@@ -197,6 +213,7 @@ export default function Appointments() {
     const [courses, setCourses] = useState(); const [selectedCourse, setSelectedCourse] = useState(null);
     const [departments, setDepartments] = useState();
 
+    
     const [studentAppointmentsList, setStudentAppointmentsList] = useState([]);
     const [searchingAppointments, setSearchingAppointments] = useState(false);
     const [searchingMood, setSearchingMood] = useState(false);
@@ -221,6 +238,8 @@ export default function Appointments() {
     const [allMoodCheckins, setAllMoodCheckins] = useState([]);
     const [resultMessage, setResultMessage] = useState('');
 
+    const [searchId, setSearchId] = useState(); 
+    const [statusHere, changeStatus] = useState('Appointments'); 
     const [selectedStudent, setSelectedShowStudent] = useState(); 
     const [showStudent, setShowStudent] = useState(false); 
     const [dataFound, setDataFound] = useState(true); 
@@ -357,7 +376,7 @@ export default function Appointments() {
                 
                 if(!completed){
 
-                    getAllRequests(currentStatus, initialDatesValues.from,initialDatesValues.to);
+                    // getAllRequests(currentStatus, initialDatesValues.from,initialDatesValues.to);
                 }
                 else {
                     console.log("DONE READING");
@@ -487,32 +506,34 @@ export default function Appointments() {
       // setOffset(offset+10); // update the offset for every call
   
       try {    
-          const result  = await getAppointmentsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
-          const queryResult = await result.json() // get data
-          console.log(queryResult);
-          // check for the status
-          if(queryResult.status == 200){
-  
-              // check if data exits
-              if(queryResult.data.length > 0){
-                  
-                  // get the messages list of the receiver
-                  setStudentAppointmentsList(queryResult.data);
-                  
-                  setSearchingAppointments(false);
-              }
-              else {
-                  
+          const result0  = await getBasicStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
+          const queryResult0 = await result0.json() // get data
+          console.log(queryResult0);
+
+          setShowStudent(true);
+
+          if(queryResult0.status == 200){
+
+            setSelectedShowStudent(queryResult0.data);
+
+                const result  = await getAppointmentsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
+                const queryResult = await result.json() // get data
+                console.log(queryResult);
+                // check for the status
+                if(queryResult.status == 200){
+        
+                    if(queryResult.data.length > 0){
+                        setStudentAppointmentsList(queryResult.data);
+                    }   
+                    
+                }
                 setSearchingAppointments(false);
-              }
-              // setCompleted(false);
-          }
-          else {
-              
-            setSearchingAppointments(false);
-            //   dataFound=false;
-              // setCompleted(true);
-          }
+
+                getMoodMetricsOfStudent(studentId);
+                setSelectedShowStudent(studentId);
+                // setShowStudent(true);
+                
+            }
       }
       catch (e){
           // show and hide message
@@ -749,12 +770,20 @@ function getLatestRequests() {
 // update the selected student
 function updateSelectedStudent(value) {
     
-    getAppointmentsOfStudent(value.getValue("collegeId"));
-    getMoodMetricsOfStudent(value.getValue("collegeId"));
-    setSelectedShowStudent(value);
-    setShowStudent(true);
+    getAppointmentsOfStudent(value);
+    
     
 }
+
+const onChangeHandler = (e) => {
+    console.log(e.target.value);
+    setSearchId(e.target.value);
+    
+    // setRoomName(e.target.value+"OK");
+    
+    // setInput(e.target.value)
+    // socket.emit('input-change', e.target.value)
+};
 
 // update the currentStatus variable
 function updateStatus(value) {
@@ -883,10 +912,10 @@ const handleCourseChange = (newCourse) => {
           <div className={dmSans.className} style={{height:'8vh',display:'flex',flexDirection:'column',justifyContent:'space-around', marginTop:'20px'}}>
               {/* <h1 className="text-3xl font-bold leading-normal">Appointments</h1> */}
               <div className={styles.horizontalsection}>
-                <h1 className="text-3xl font-bold leading-normal">Appointments</h1>
+                <h1 className="text-3xl font-bold leading-normal">Students</h1>
                 {searching ? <div className="flex flex-row items-center"><SpinnerGap className={`${styles.icon} ${styles.load}`} /> Loading...</div> : ''}
               </div>
-              <p className="text-sm text-slate-500">Received based on your availability</p>
+              <p className="text-sm text-slate-500">Search student by their college Id to view details</p>
               
           </div>      
           
@@ -913,209 +942,6 @@ const handleCourseChange = (newCourse) => {
          
     <div className={styles.verticalsection} style={{height:'80vh', width:'100%',gap:'8px'}}>
 
-        {/* <div className={styles.horizontalsection} style={{height:'100%', width:'100%'}}> */}
-
-        {/* <RadioGroup defaultValue={(viewTypeSelection == 'college') ? "college" : "hostel"} value={viewTypeSelection} onValueChange={setViewTypeSelection} className="flex flex-row items-center">
-            <Label className="text-sm text-muted-foreground">View by:</Label>
-            <div className="flex items-center space-x-2">
-                <RadioGroupItem value="college" id="r11" />
-                <Label htmlFor="r11" className="text-md font-medium">Colleges</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-                <RadioGroupItem value="hostel" id="r22" />
-                <Label htmlFor="r22" className="text-md font-medium">Hostels</Label>
-            </div>
-        </RadioGroup> */}
-
-
-{/* <div className="p-2 border rounded flex flex-row " style={{height:'fit-content', gap: '40px'}}>
-        
-    <div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px',height:'fit-content'}}>
-        <div className="flex-1 text-sm text-muted-foreground">Total Hostels Strength:</div>
-        {searching ? <div className={styles.horizontalsection}>
-            <SpinnerGap className={`${styles.icon} ${styles.load}`} />
-            <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
-        </div> : ''}
-        <h1>{totalHostelsStrength}</h1>
-    </div>
-    
-    <div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px',height:'fit-content'}}>
-        
-        <div className="flex-1 text-sm text-muted-foreground">In Outing:</div>
-        {searching ? <div className={styles.horizontalsection}>
-            <SpinnerGap className={`${styles.icon} ${styles.load}`} />
-            <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
-        </div> : ''}
-        <h1>{totalInOutingStrength}</h1>
-    </div>
-    <div className={`${inter.className}`} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'8px',height:'fit-content'}}>
-        
-        <div className="flex-1 text-sm text-muted-foreground">In Hostel:</div>
-        {searching ? <div className={styles.horizontalsection}>
-            <SpinnerGap className={`${styles.icon} ${styles.load}`} />
-            <p className={`${inter.className} ${styles.text3}`}>Loading ...</p> 
-        </div> : ''}
-        <h1>{totalInHostelStrength}</h1>
-    </div>
-</div> */}
-
-        {(viewTypeSelection == 'college') ? 
-        <div className="flex items-center py-2" style={{gap:'10px'}}>
-            {/* {(campuses.length != 0) ?
-            <div>
-                <div className="flex-1 text-sm text-muted-foreground">
-                    Colleges:
-                </div>
-                <Select onValueChange={handleCampusChange} defaultValue="All">
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent >
-                        <SelectItem value='All'>All</SelectItem>
-                        {
-                            campuses.map((campus) => <SelectItem key={campus.campusId} value={campus.campusId}>{campus.campusId}</SelectItem>)
-                        }
-                </SelectContent>
-                </Select>
-            </div>
-            : <br/>
-            } */}
-
-            {/* show courses */}
-            {/* {(selectedCampus!=null && selectedCampus != 'All' && courses.length > 0) ?
-                <div>
-                    <div className="flex-1 text-sm text-muted-foreground">
-                        Courses:
-                    </div>
-                    <Select onValueChange={handleCourseChange} >
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent>
-                            <SelectItem value='All'>All</SelectItem>
-                            {
-                                courses.map((course) => <SelectItem key={course} value={course}>{course}</SelectItem>)
-                            }
-                    </SelectContent>
-                    </Select>
-                </div>
-                : <br/>
-            } */}
-
-            {/* branches selection */}
-            {/* {(branches.length) > 0 ?
-                <Drawer>
-                <DrawerTrigger className="flex flex-col flex-start">
-                    <div className="text-sm">
-                    Branches and Years:
-                    </div>
-                    {(branchTypeSelection != 'all') ? 
-                        <Button variant="outline">{(selectedBranchYears.length > 0) ? selectedBranchYears.length+' Selected' : 'Select Branches and Years'}</Button>
-                        : <Button variant="outline">All Branches & years Selected</Button>
-                    }
-                </DrawerTrigger>
-                <DrawerContent>
-                    <DrawerHeader>
-                    <DrawerTitle>Select branches</DrawerTitle>
-                    <DrawerDescription>Select all or group of branches and their years.</DrawerDescription>
-                    </DrawerHeader>    
-            
-                    <div className="p-4 pb-0">
-                        
-                        <RadioGroup defaultValue={(branchTypeSelection == 'all') ? "all" : "notall"} value={branchTypeSelection} onValueChange={setBranchTypeSelection}>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="all" id="r1" />
-                                <Label htmlFor="r1" className="text-md font-medium">All branches & years</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="notall" id="r2" />
-                                <Label htmlFor="r2" className="text-md font-medium">Select branches & years</Label>
-                            </div>
-                        </RadioGroup>
-                        <br/>
-                        {(branchTypeSelection != 'all') ? 
-
-                            <div style={{display: 'flex',flexDirection:'column',gap:'20px'}}>
-
-                                <div style={{display: 'flex',flexDirection:'row',gap:'20px'}}>
-                                    {branches.map(branch => (
-                                        <div className="flex items-center space-x-2" style={{cursor:'pointer',width:'fit-content'}}  key={branch}>
-                                            <Checkbox id={branch} checked={selectedBranches.includes(branch)} onCheckedChange={()=>handleBranchChange(branch)}/>
-                                            <label htmlFor={branch} className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                {branch}
-                                            </label>
-                                        </div>
-                                    ))}
-                                </div>
-                                <Separator className="my-4" />
-                                <div style={{display: 'flex',flexDirection:'column',flexWrap:'wrap',gap:'20px',height:'240px'}}>
-                                    {branchYears.map(branchYear => (
-
-                                        <div className="flex items-center space-x-2" style={{ cursor:'pointer'}}  key={branchYear}>
-                                        <Checkbox id={branchYear} checked={selectedBranchYears.includes(branchYear)} onCheckedChange={()=>handleBranchYearChange(branchYear)}/>
-                                        <label htmlFor={branchYear} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            {branchYear}
-                                        </label>
-                                        </div>
-                                        
-                                    ))}
-                                </div>
-                            </div>
-                            : null
-                        }
-
-
-                    </div>
-                    <Separator className="my-4" />
-                    <DrawerFooter>
-                    
-                    <DrawerClose className="sm:justify-start">
-                        <Button type="submit" size="sm" className="px-3">Save</Button>&nbsp;&nbsp;
-                        <Button variant="outline">Cancel</Button>
-                    </DrawerClose>
-                    </DrawerFooter>
-                </DrawerContent>
-                </Drawer>
-            : null} */}
-
-        {/* {(campuses.length != 0) ?
-        <div>
-            <br/>
-            <Button type="submit" size="sm" className="px-3" onClick={getLatestRequests}>Go</Button>
-        </div>
-        : null } */}
-
-        </div>
-
-        :
-
-        <div className="flex items-center py-2" style={{gap:'10px'}}>
-            {(hostels.length != 0) ?
-            <div>
-                <div className="flex-1 text-sm text-muted-foreground">
-                    Hostels:
-                </div>
-                <Select onValueChange={handleCampusChange} defaultValue="All">
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent >
-                {/* <SelectGroup >
-                    <SelectLabel>Colleges</SelectLabel> */}
-                        <SelectItem value='All'>All</SelectItem>
-                        {
-                            hostels.map((hostel) => <SelectItem key={hostel.hostelId} value={hostel.hostelId}>{hostel.hostelName}</SelectItem>)
-                        }
-                {/* </SelectGroup> */}
-                </SelectContent>
-                </Select>
-            </div>
-            : null}
-        </div>
-    }
-
-
-
 {/*     
 <Select
       value={selectedCampus}
@@ -1131,26 +957,43 @@ const handleCourseChange = (newCourse) => {
 {/* <div className="container mx-auto py-10"> */}
 {/* <div>{allRequests.length}</div> */}
 
-      <DataTable columns={columns} data={allRequests} status={currentStatus} changeStatus={updateStatus} changeSelectedStudent={updateSelectedStudent} downloadNow={downloadRequestsNow} initialDates={initialDatesValues} dates={changeDatesSelection} requestAgain={updateOffset} loadingIds={loadingIds} removeAppointment={handleRemoveAppointment} handleAcceptClick={handleAcceptClick} handleCompleteClick={handleCompleteClick} handleCancelClick={handleCancelClick} handleTimeUpdateClick={handleTimeUpdateClick} />
+    <div className='flex flex-row items-center gap-4 mt-8'>
+        <Input placeholder="Type college Id and press enter" value={searchId} onChange={onChangeHandler}/>
+        <Button onClick={() => updateSelectedStudent(searchId)} >Find</Button>
+        {searchingAppointments ? 
+                        <div className={styles.horizontalsection}>
+                            <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                            <p className={`${inter.className} ${styles.text3}`}>Searching student ...</p> 
+                        </div> : ''}
+    </div>
+      {/* <DataTable columns={columns} data={allRequests} status={currentStatus} changeStatus={updateStatus} changeSelectedStudent={updateSelectedStudent} downloadNow={downloadRequestsNow} initialDates={initialDatesValues} dates={changeDatesSelection} requestAgain={updateOffset} loadingIds={loadingIds} removeAppointment={handleRemoveAppointment} handleAcceptClick={handleAcceptClick} handleCompleteClick={handleCompleteClick} handleCancelClick={handleCancelClick} handleTimeUpdateClick={handleTimeUpdateClick} /> */}
       {/* <DataTable columns={columns} data={allRequests} status={currentStatus} changeStatus={updateStatus} downloadNow={downloadRequestsNow} initialDates={initialDatesValues} dates={changeDatesSelection} requestAgain={updateOffset} takeAction={acceptAppointment}/> */}
       
     </div>
  : 
- <div className="mx-auto" style={{width:'100%',height:'100%'}}>
+ <div className="mx-auto mt-8" style={{width:'100%',height:'100%'}}>
     <div>
         <div className="flex flex-row gap-4">
             <Button variant="secondary" onClick={()=>setShowStudent(false)}><ArrowBendUpLeft className={`${styles.icon}`} /> &nbsp;Back</Button>
             <div className='flex flex-col gap-1'>
-                <h1 className="text-3xl font-bold leading-normal">{selectedStudent.getValue("username")}</h1>
-                <p className="text-md text-slate-500">{selectedStudent.getValue("campusId")} • {selectedStudent.getValue("collegeId")} • {selectedStudent.getValue("branch")}</p>
+                <h1 className="text-3xl font-bold leading-normal">{selectedStudent['username']}</h1>
+                <p className="text-md text-slate-500">{selectedStudent['campusId']} • {selectedStudent['collegeId']} • {selectedStudent['branch']}</p>
                 {searching ? <SpinnerGap className={`${styles.icon} ${styles.load}`} /> : ''}
             </div>
         </div>
+
+        <div>
+            <Tabs defaultValue={statusHere} className="w-[400px]">
+                <TabsList>
+                <TabsTrigger value="Appointments" onClick={()=>changeStatus('Appointments')}>Appointments</TabsTrigger>
+                <TabsTrigger value="Assessments" onClick={()=>changeStatus('Assessments')}>Assessments</TabsTrigger>
+                <TabsTrigger value="Mood" onClick={()=>changeStatus('Mood')}>Mood Metrics</TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </div>
     
         <div className={dmSans.className} style={{height:'8vh',display:'flex',flexDirection:'column',justifyContent:'space-around', marginTop:'20px'}}>
-        
-            
-            
+         
             <div className="flex flex-row gap-2 max-h-screen">
                 <div className="w-8/12 overflow-scroll">
                     <p className="text-lg text-black font-bold pt-2 uppercase">Appointments</p>

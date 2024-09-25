@@ -3,7 +3,7 @@
 
 
 import { Inter, DM_Sans, DM_Serif_Text } from 'next/font/google'
-import { ArrowDown, ArrowLeft, SpinnerGap } from 'phosphor-react'
+import { ArrowDown, ArrowLeft, ClipboardText, SpinnerGap } from 'phosphor-react'
 import { useEffect, useState } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 const dmSans = DM_Sans({ subsets: ['latin'] })
@@ -15,12 +15,34 @@ const biscuits = new Biscuits
 import dayjs from 'dayjs'
 import Toast from '../../../../components/myui/toast';
 import { Button } from "@/app/components/ui/button"
-import { Table, TableHead, TableRow, TableCell, TableBody } from "@/app/components/ui/table"
+// import { Table, TableHead, TableRow, TableCell, TableBody } from "@/app/components/ui/table"
 import { Input } from "@/app/components/ui/input"
 import { Label } from "@/app/components/ui/label"
 import {Card,CardContent,CardDescription,CardFooter,CardHeader,CardTitle,} from "@/app/components/ui/card"
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+    SheetFooter,
+    SheetClose
+  } from "@/app/components/ui/sheet"
 import { Skeleton } from "@/app/components/ui/skeleton"
 const xlsx = require('xlsx');
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel} from '@/app/components/ui/select'
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "@/app/components/ui/table"
+import { Separator } from '@/app/components/ui/separator'
+  
 
 // get the appointments for PsychAdmin
 const getAllAppointmentsDataAPI = async (pass, role, campusId, offset) => 
@@ -35,8 +57,7 @@ fetch("/api/psych/assessments/"+pass+"/"+role+"/2/"+campusId+"/"+offset, {
 
 
 // get the appointments for PsychAdmin
-const getStudentsDataAPI = async (pass, role, students) => 
-  
+const getStudentsDataAPI = async (pass, role, students) =>  
 fetch("/api/psych/assessments/"+pass+"/"+role+"/3/"+students, {
     method: "GET",
     headers: {
@@ -44,6 +65,42 @@ fetch("/api/psych/assessments/"+pass+"/"+role+"/3/"+students, {
         Accept: "application/json",
     },
 });
+
+// get question answers of assessments
+const getQuestionAnswersOfAssessmentDataAPI = async (pass, studentId, campusId, assessmentId) =>  
+fetch("/api/psych/questions/"+pass+"/Student/0/"+studentId+"/"+campusId+"/"+assessmentId, {
+    method: "GET",
+    headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+    },
+});
+
+
+// Function to lighten or darken a color
+function adjustColor(color, percent) {
+    let R = parseInt(color.substring(1, 3), 16);
+    let G = parseInt(color.substring(3, 5), 16);
+    let B = parseInt(color.substring(5, 7), 16);
+  
+    R = parseInt((R * (100 + percent)) / 100);
+    G = parseInt((G * (100 + percent)) / 100);
+    B = parseInt((B * (100 + percent)) / 100);
+  
+    R = R < 255 ? R : 255;
+    G = G < 255 ? G : 255;
+    B = B < 255 ? B : 255;
+  
+    let RR = R.toString(16).length == 1 ? '0' + R.toString(16) : R.toString(16);
+    let GG = G.toString(16).length == 1 ? '0' + G.toString(16) : G.toString(16);
+    let BB = B.toString(16).length == 1 ? '0' + B.toString(16) : B.toString(16);
+  
+    return `#${RR}${GG}${BB}`;
+  }
+  
+  // Base color similar to #fff7cf
+  const baseColor = '#fff7cf';
+
 // verification using college Id
 // In future, based on the type of the user verification can be succeded
 // If the user is found in the database, OTP will be sent for the user mobile number based on the user type
@@ -53,31 +110,33 @@ export default function AssessmentDetail({ searchParams}) {
     
     // create a router for auto navigation
     const router = useRouter();
-      console.log(searchParams.id);
-      console.log(searchParams.title);
-      console.log(searchParams.type);
+    //   console.log(searchParams.id);
+    //   console.log(searchParams.title);
+    //   console.log(searchParams.type);
         
     // session variable to track login
     const [session, setSession] = useState(false);
     // var finalData = [];
     const [finalData, setFinalData] = useState([]);
+    const [assessmentQuestions, setAssessmentQuestions] = useState([]);
+    const [assessmentAnswers, setAssessmentAnswers] = useState([]);
+    const [assessmentOptions, setAssessmentOptions] = useState([]);
+    // const assessmentOptions = [];
+
     const [allAnswers, setAllAnswers] = useState([]);
     const [allResults, setAllResults] = useState([]);
+    const [allStudents, setAllStudents] = useState([]);
     const [assessmentId, setAssessmentId] = useState(searchParams.id);
     const [assessmentTitle, setAssessmentTitle] = useState(searchParams.title);
     const [assessmentType, setAssessmentType] = useState(searchParams.type);
-    const [username, setUsername] = useState('');
     const [offset, setOffset] = useState(0);
-    const [email, setEmail] = useState('');
     const [downloading, setDownloading] = useState(false);
     const [errorMsg, seterrorMsg] = useState('');
 
-    const [otpSent, setotpSent] = useState(false);
-    const [verifyOtpMsg, setverifyOtpMsg] = useState('');
-    const [otp, setOTP] = useState()
+    // Get unique result types and assign a shade
+    const [shades, setShades] = useState([]);
+    const [selectedResultType, setSelectedResultType] = useState("All result types");
 
-    const [infoMsg, setinfoMsg] = useState(false);
-    const [user, setUser] = useState();
 
     // this is to save the jsonResult for verification
     const [queryResult, setQueryResult] = useState(); 
@@ -116,7 +175,7 @@ export default function AssessmentDetail({ searchParams}) {
             
             const resultData = await result.json() // get data
             setQueryResult(resultData); // store data
-            // console.log(resultData);
+            console.log(resultData);
             // check if query result status is 200
             // if 200, that means, user is found and OTP is sent
             if(resultData.status == 200) {
@@ -124,7 +183,38 @@ export default function AssessmentDetail({ searchParams}) {
                 // set the state variables with the user data
 
                 setAllAnswers(resultData.answers);
-                setAllResults(resultData.results);
+
+                // Sort based on the first number in the 'result' range
+                const sortedData = resultData.results.sort((a, b) => {
+                    const aResult = parseInt(a.result.split(',')[0]); // Extract the first number from 'result'
+                    const bResult = parseInt(b.result.split(',')[0]);
+                    
+                    return aResult - bResult; // Sort in ascending order
+                });
+                setAllResults(sortedData);
+
+
+
+                // showing the list of students right away
+                // const uniqueCollegeIds = [...new Set(resultData.answers.map(item => item.collegeId))];
+                const uniqueCollegeIds = resultData.answers.map(item => item.collegeId);
+                const commaSeparatedCollegeIds = uniqueCollegeIds.join(',');
+                
+                // call for students data right away to show on the UI
+                const result2  = await getStudentsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, commaSeparatedCollegeIds, )
+            
+                const resultData2 = await result2.json() // get data
+                console.log(resultData2);
+                setAllStudents(resultData2.data);
+
+                // Get unique result types and assign a shade
+                const shades = sortedData.map((item, index) => {
+                    return adjustColor(baseColor, index * -10); // Darken by 10% for each item
+                });
+                setShades(shades);
+
+                // get the selected assessement's questions and answers
+                getQuestionAnswersOfAssessment(searchParams.id);
 
                 resultData.results.forEach(result => {
 
@@ -157,12 +247,145 @@ export default function AssessmentDetail({ searchParams}) {
             }, 3000);
         }
     }
+ // Function to handle dropdown change
+ const handleResultTypeChange = (e) => {
+    setSelectedResultType(e);
+  };
+
+  // Function to filter students based on result type
+  const filteredStudents = allStudents.filter((student) => {
+    if (selectedResultType === "All result types") {
+      return true; // Show all students when "All result types" is selected
+    }
+    const resultData = getResultDataByCollegeId(student.collegeId);
+    return resultData.title === selectedResultType;
+  });
+
+// Function to get the Result Data based on collegeId
+function getResultDataByCollegeId(collegeId) {
+    // Find the answer with matching collegeId
+    const answer = allAnswers.find(a => a.collegeId === collegeId);
+  
+    if (answer) {
+      // Find the result with matching resultId
+      const result = allResults.find(r => r.resultId === answer.resultId);
+      if (result) {
+        return result;
+      }
+    }
+    return 'No result found';
+  }
+  
+
+// Function to get the Shade Color based on collegeId
+function getShadeColorByCollegeId(collegeId) {
+    // Find the answer with matching collegeId
+    const answer = allAnswers.find(a => a.collegeId === collegeId);
+  
+    if (answer) {
+      // Find the result with matching resultId
+    //   const result = allResults.find(r => r.resultId === answer.resultId);
+
+      const ind = allResults.findIndex(r => r.resultId === answer.resultId);
+      return ind;
+    }
+    return 'No result found';
+  }
+
+  function getOptions(question, collegeId){
+    // parse through each question and get the respective answers.
+    const assessmentOptions1 = [];
+    
+        for (let j = 1; j <= question.options; j++) {
+            
+            assessmentOptions1.push(question[`option${j}`]);
+          }
+        // question.
+        const correctOptions = allAnswers.find(a => a.collegeId === collegeId).answers.split(',').map(item => {
+            const [sequence, correctOption] = item.split('-');
+            return { sequence: parseInt(sequence, 10), correctOption: parseInt(correctOption, 10) };
+        })
+
+        // Find the correct option from the correctOptions array based on sequence
+        const correctOptionData = correctOptions.find(item => item.sequence === question.sequence-1);
+
+        return question[`option${correctOptionData.correctOption + 1}`];
+    // return assessmentOptions1;
+  }
 
 function getUniqueStudentsCount(resultId){
     const result = allAnswers.filter(answer => answer.resultId == resultId);
     const uniqueCollegeIds = [...new Set(result.map(item => item.collegeId))];
     return uniqueCollegeIds.length;
 }
+
+
+    // Get question answers of assessment
+    async function getQuestionAnswersOfAssessment(assessmentId){
+        
+        // setSearchingSales(true);
+
+        try {    
+            
+            const result  = await getQuestionAnswersOfAssessmentDataAPI(process.env.NEXT_PUBLIC_API_PASS, '-','-',assessmentId) 
+            const queryResult = await result.json() // get data
+
+            console.log(queryResult);
+            // check for the status
+            if(queryResult.status == 200){
+
+                // check if data exits
+                if(queryResult.questions.length > 0){
+                    
+                    setAssessmentQuestions(queryResult.questions);
+                    setAssessmentAnswers(queryResult.results);
+
+                    // parse through each question and get the respective answers.
+                    // const assessmentOptions1 = [];
+                    // for (let i = 1; i <= queryResult.questions.length; i++) {
+                    //     for (let j = 1; j <= queryResult.questions[i].options; j++) {
+                    //         // setAssessmentOptions([...assessmentOptions, queryResult.questions[i][`option${j}`]])
+                    //         // console.log(queryResult.questions[i][`option${j}`]);
+                            
+                    //         assessmentOptions1.push(queryResult.questions[i][`option${j}`]);
+                    //       }
+                    //   }
+                    // setAssessmentOptions(assessmentOptions1);
+                    setDataFound(true);
+                }
+                else {
+                    setAssessmentQuestions([]);
+                    setAssessmentAnswers([]);
+                    setDataFound(false);
+                }
+
+                // setSearchingSales(false);
+                // setCompleted(false);
+            }
+            else if(queryResult.status == 401 || queryResult.status == 201 ) {
+                setAssessmentQuestions([]);
+                setAssessmentAnswers([]);
+                // setSearchingSales(false);
+                // setDataFound(false);
+                // setCompleted(true);
+            }
+            else if(queryResult.status == 404) {
+                setAssessmentQuestions([]);
+                setAssessmentAnswers([]);
+                // toast({
+                //     description: "No more requests with "+status+" status",
+                //   })
+                  
+                //   setSearchingSales(false);
+                // setDataFound(false);
+                // setCompleted(true);
+            }
+        }
+        catch (e){
+            
+            // toast({ description: "Issue loading. Please refresh or try again later!", })
+        }
+    }
 
 function downloadNow(resultId) {
     
@@ -233,10 +456,11 @@ function downloadNow(resultId) {
         <div className={dmSans.className} style={{display:'flex',flexDirection:'column',justifyContent:'space-around', marginTop:'12px'}}>
             
             <div className={styles.horizontalsection}>
-                <h1 className="text-3xl font-bold leading-normal">Assessment Results</h1>
+                <h1 className="text-3xl font-bold leading-normal">{searchParams.title}</h1>
                 {(allResults.length == 0) ? <SpinnerGap className={`${styles.icon} ${styles.load}`} /> : ''}
             </div>
-            {/* <p className="text-sm text-slate-500">Students will be in any of below result set once assessment is taken by them.</p> */}
+            <p className="text-sm text-slate-500">Assessment Results</p>
+            {/* <p className="text-sm text-slate-500">Assessment Results - Students will be in any of below result set once assessment is taken by them.</p> */}
             
         </div>     
       
@@ -269,10 +493,11 @@ function downloadNow(resultId) {
             : <div>This assessment evaluation is based on {allResults.length} ranges</div>
         }
         
+        {(shades.length > 0) ? 
         <div className={`${inter.className}`} style={{display:'flex',flexDirection:'row',justifyContent:'space-between', width:'100%', alignItems: 'start',gap:'8px'}}>
             {/* {allResults.map(result => ( */}
             {allResults.map((result, dayIndex) => (
-            <Card key={dayIndex} className="w-[350px]">
+            <Card key={dayIndex} className="w-[350px]" style={{backgroundColor: `${shades[dayIndex]}`}}>
                 <CardHeader>
                 {(allResults.length == 0) ? <div className={styles.horizontalsection}>
                                     <SpinnerGap className={`${styles.icon} ${styles.load}`} />
@@ -305,12 +530,109 @@ function downloadNow(resultId) {
                       
         ))}
         </div>
+        : ''}
         
         {downloading ? 
         <div className={styles.horizontalsection} style={{width:'100%',backgroundColor:'forestgreen',borderRadius:'4px',padding: '8px 12px'}}>
             <SpinnerGap className={`${styles.icon} ${styles.load}`} style={{color: 'white'}}/>
             <p className={`${inter.className} ${styles.text3}`} style={{color: 'white'}}>Downloading ...</p> 
         </div> : ''}
+
+        {(allStudents.length > 0) ? 
+        <Card className='flex flex-col gap-2 p-2'>
+            <Select value={selectedResultType} onValueChange={(e)=>handleResultTypeChange(e)}>
+                <SelectTrigger className="text-black">
+                    <SelectValue placeholder="All result types" className="text-black" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                    {/* <SelectLabel className="text-black">All result types</SelectLabel> */}
+                    <SelectItem key='All result types' value='All result types' className="text-black">All result types</SelectItem>
+                        {allResults.map((row) => (
+                            <SelectItem key={row.resultId} value={row.title} className="text-black">{row.title}</SelectItem>))}
+                        {/* {allResults.filter(row => row.role === 'SalesExecutive').map((row) => (
+                            <SelectItem key={row.id} value={row.id} className="text-black">{row.name}<br/>{row.mapTo}</SelectItem>))} */}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Branch</TableHead>
+                        <TableHead>Year</TableHead>
+                        <TableHead>Result Range</TableHead>
+                        <TableHead>Result</TableHead>
+                        <TableHead>Assessment date</TableHead>
+                        <TableHead></TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                {filteredStudents.map((row, dayIndex) => (
+                    // {allStudents.map((row) => (
+                        <TableRow key={dayIndex} style={{backgroundColor: `${shades[getShadeColorByCollegeId(row.collegeId)]}`}}>
+                            <TableCell className="py-2">{row.username}<br/>
+                                <p className="text-muted-foreground">
+                                    {row.collegeId} 
+                                </p>
+                            </TableCell>
+                            {/* <TableCell onClick={()=>console.log(row.username)}>
+                                <div className="text-sm text-slate-500 bg-slate-50 px-1 py-1 w-fit border border-slate-200 rounded">
+                                    {row.username}
+                                </div>
+                                </TableCell> */}
+                            <TableCell>{row.branch}</TableCell>
+                            <TableCell>{row.year}</TableCell>
+                            <TableCell>{getResultDataByCollegeId(row.collegeId).result}</TableCell>
+                            <TableCell>{getResultDataByCollegeId(row.collegeId).title}</TableCell>
+                            <TableCell>{dayjs(allAnswers.find(a => a.collegeId === row.collegeId).createdOn).format("DD MMM YYYY hh:mm A")}</TableCell>
+                            <TableCell>
+                            
+                                    <Sheet>
+                                        <SheetTrigger asChild>
+                                            <Button className="mx-2 px-2" ><ClipboardText size={24}/> &nbsp;View Assessment</Button>            
+                                            {/* <Button variant='outline' className="mx-2 px-2 text-green-600" onClick={()=>selectDealerForUpdate(row)}><PencilSimpleLine size={24} className="text-green-600"/> &nbsp;Edit</Button>             */}
+                                        </SheetTrigger>
+                                        <SheetContent>
+                                            <SheetHeader>
+                                                <SheetTitle>Assessment Answers</SheetTitle>
+                                                <SheetDescription>
+                                                    {row.username}<br/>{row.collegeId}<br/>{row.campusId}<br/>{row.branch} - {row.year} year
+                                                </SheetDescription>
+                                            </SheetHeader>
+                                            <div className="grid gap-4 py-4 h-5/6 overflow-scroll">
+                                                
+                                                <div className="flex flex-col py-2 gap-2">
+                                                    {assessmentQuestions.map((question, dayIndex) => (
+                                                        <Card className='flex flex-col p-2 gap-2'>
+                                                            <p className='text-slate-700'>{dayIndex+1}.&nbsp;{question.question}</p>
+                                                            <p className='text-black font-semibold'>{getOptions(question, row.collegeId)}</p>
+                                                        </Card>
+                                                    ))
+                                                    }
+                                                </div>
+                                                <Separator />
+                                                
+                                                
+                                            </div>
+                                            <SheetFooter>
+                                            <SheetClose asChild>
+                                                {/* <Button type="submit" className="bg-blue-600 text-white" onClick={()=>updateDealer(row.id)}>Update</Button> */}
+                                            </SheetClose>
+                                            </SheetFooter>
+                                        </SheetContent>
+                                    </Sheet> 
+                                {/* {row.isActive == 1 ?
+                                    <Button variant='outline' className="mx-2 px-2 text-red-600" onClick={()=>updateActiveStatus(row.id, 0)}><UserMinus size={24} className="text-red-600"/> &nbsp;Deactivate</Button>
+                                    : <Button variant='outline' className="mx-2 px-2 text-blue-600" onClick={()=>updateActiveStatus(row.id, 1)}><UserPlus size={24} className="text-blue-600"/> &nbsp;Activate</Button>
+                                }  */}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </Card>
+        : ''}
         
       
         {/* <div style={{width:'100%',display:'flex', flexDirection:'row',justifyContent:'space-between'}}>

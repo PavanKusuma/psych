@@ -604,7 +604,7 @@ function downloadNow(resultId) {
                                                 
                                                 <div className="flex flex-col py-2 gap-2">
                                                     {assessmentQuestions.map((question, dayIndex) => (
-                                                        <Card className='flex flex-col p-2 gap-2'>
+                                                        <Card className='flex flex-col p-2 gap-2' key={dayIndex}>
                                                             <p className='text-slate-700'>{dayIndex+1}.&nbsp;{question.question}</p>
                                                             <p className='text-black font-semibold'>{getOptions(question, row.collegeId)}</p>
                                                         </Card>

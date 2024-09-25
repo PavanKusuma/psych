@@ -1015,7 +1015,7 @@ const handleCourseChange = (newCourse) => {
                                 <div className="flex flex-col gap-2">
                                     <p className="text-lg text-black flex flex-row items-center"><Watch className={`${styles.icon}`} /> &nbsp;{dayjs(appointment.requestDate).utcOffset(0).format("hh:mm A")} &nbsp;&nbsp; <MapPin className={`${styles.icon}`} /> &nbsp;{(appointment.mode == 0) ? 'In Person':'Virtual'} &nbsp;&nbsp; {appointment.requestStatus}</p>
                                     <div className="flex flex-row"><p className="text-md text-slate-500">Topic:&nbsp;</p><p className="text-md text-black">{appointment.topic}</p></div>
-                                    <div className="flex flex-row"><p className="text-md text-slate-500">Student's reason:&nbsp;</p><p className="text-md text-black">{appointment.description}</p></div>
+                                    <div className="flex flex-row"><p className="text-md text-slate-500">Students reason:&nbsp;</p><p className="text-md text-black">{appointment.description}</p></div>
                                     <div className="flex flex-row"><p className="text-md text-slate-500">Notes:&nbsp;</p><p className="text-md text-black">{appointment.notes}</p></div>
                                     {/* <p className="text-md text-black">Student's reason: {appointment.description}</p>
                                     <p className="text-md text-black">Notes: {appointment.notes}</p> */}

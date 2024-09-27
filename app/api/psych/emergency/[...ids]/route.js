@@ -16,14 +16,6 @@ export async function GET(request,{params}) {
     // get the pool connection to db
     const connection = await pool.getConnection();
 
-    // current date time for updating
-    var currentDate =  dayjs(new Date(Date.now())).format('YYYY-MM-DD HH:mm:ss');
-    var appointmentDate =  dayjs(params.ids[7]).format('DD-MM-YYYY HH:mm A');
-    var startTime =  dayjs(params.ids[7]).format('HH:mm:ss');
-    var endTime =  dayjs(params.ids[7]).format('HH:mm:ss');
-    console.log(startTime);
-    console.log(endTime);
-
     try{
 
         // authorize secret key
@@ -31,34 +23,21 @@ export async function GET(request,{params}) {
 
                 try {
 
-                    // check if any active request exists for the provided collegeId
-                    const q0 = 'select collegeId from psych_appointment where collegeId="'+params.ids[2]+'" and isOpen = 1';
-                    const [rows0, fields0] = await connection.execute(q0);
+                    // details to send notification
+                    const adminPhoneNumber = params.ids[1];
+                    const studentId = params.ids[2];
+                    const studentName = params.ids[3];
+                    const studentPhoneNumber = params.ids[4];
                     
-                    if(rows0.length == 0){
+                    if(adminPhoneNumber.length > 0){
 
-                        // create query for insert
-                        const q = 'INSERT INTO psych_appointment (appointmentId, collegeId, adminId, adminName, topic, description, requestDate, startTime, endTime, isOpen, requestStatus, notes, mode, createdOn, updatedOn, campusId) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                        // create new request
-                        const [rows, fields] = await connection.execute(q, [ params.ids[1], params.ids[2], params.ids[3], params.ids[4], params.ids[5], decodeURIComponent(params.ids[6]), params.ids[7], params.ids[8],params.ids[9], 1,  "Submitted", "-", params.ids[10], params.ids[13], params.ids[13], params.ids[11]]);
+                        // get the gcm_regId of admin
+                        const q = 'SELECT gcm_regId from users where phoneNumber = "'+adminPhoneNumber+'" and role="PsychAdmin"';
+                        const [rows, fields] = await connection.execute(q);
                         connection.release();
 
-                        // get the gcm_regIds of SuperAdmin and branch admin to notify
-                        // const [nrows, nfields] = await connection.execute('SELECT gcm_regId FROM `user` where role IN ("SuperAdmin_P")');
-
-                        // // get the gcm_regIds list from the query result
-                        // var gcmIds = [];
-                        // for (let index = 0; index < nrows.length; index++) {
-                        //   const element = nrows[index].gcm_regId;
-                        //   if(element.length > 3)
-                        //     gcmIds.push(element); 
-                        // }
-
-                        // // var gcmIds = 
-                        // // console.log(gcmIds);
-
                         // send the notification
-                        const notificationResult = await send_notification('New Appointment for '+appointmentDate+' received!', params.ids[12], 'Single');
+                        const notificationResult = await send_notification('Emergency from '+studentName+'-('+studentId+'). Phone: '+studentPhoneNumber+'', rows[0].gcm_regId, 'Single');
                             
                         // return successful update
                         return Response.json({status: 200, message:'Request submitted!', notification: notificationResult}, {status: 200})

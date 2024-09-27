@@ -54,8 +54,8 @@ export async function GET(request,{params}) {
                         const [rows, fields] = await connection.execute('UPDATE psych_appointment SET adminId ="'+params.ids[3]+'", adminName ="'+params.ids[4]+'", requestStatus ="Confirmed", updatedOn ="'+params.ids[5]+'" where appointmentId = "'+params.ids[2]+'"');
                         // const [rows, fields] = await connection.execute('UPDATE psych_appointment SET adminId ="'+params.ids[4]+'", requestStatus ="'+params.ids[6]+'", updatedOn ="'+params.ids[7]+'" where appointmentId = "'+params.ids[2]+'"');
 
-                        // get the player Id of user using collegeId
-                        const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[6]+'"');
+                        // get the player Id of users using collegeId
+                        const [rows1, fields1] = await connection.execute('SELECT gcm_regId from users where collegeId = "'+params.ids[6]+'"');
                         connection.release();
     
 
@@ -76,8 +76,8 @@ export async function GET(request,{params}) {
             
                 try {
                     const [rows, fields] = await connection.execute('UPDATE psych_appointment SET requestStatus ="InMeeting", updatedOn ="'+params.ids[5]+'" where appointmentId = "'+params.ids[2]+'"');
-                    // get the player Id of user using collegeId
-                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[6]+'"');
+                    // get the player Id of users using collegeId
+                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from users where collegeId = "'+params.ids[6]+'"');
                     connection.release();
 
                     // send the notification
@@ -102,7 +102,7 @@ export async function GET(request,{params}) {
             else if(params.ids[1] == 'S3'){ 
                 try {
                     const [rows, fields] = await connection.execute('UPDATE psych_appointment SET isOpen = 0, requestStatus ="Completed", updatedOn = "'+params.ids[5]+'", notes = "'+comment+'" where appointmentId = "'+params.ids[2]+'" and isOpen = 1');
-                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[6]+'"');
+                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from users where collegeId = "'+params.ids[6]+'"');
                     connection.release();
                     // check if the request is updated. 
                     // It will not get updated incase Any Admin has cancelled the request before checkout
@@ -134,15 +134,19 @@ export async function GET(request,{params}) {
             else if(params.ids[1] == 'S4'){ 
                 try {
                     const [rows, fields] = await connection.execute('UPDATE psych_appointment SET isOpen = 0, requestStatus ="Cancelled", updatedOn="'+currentDate+'" where appointmentId = "'+params.ids[2]+'"');
-                    // get the player Id of user using collegeId
-                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[4]+'"');
+                    // get the player Id of users using collegeId
+                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from users where collegeId = "'+params.ids[4]+'"');
+                    const [rows2, fields2] = await connection.execute('SELECT u.gcm_regId, p.requestDate from users u JOIN psych_appointment p ON u.collegeId=p.adminId where p.appointmentId = "'+params.ids[2]+'"');
+                    console.log('SELECT u.gcm_regId, p.requestDate from users u JOIN psych_appointment p ON u.collegeId=p.adminId where p.appointmentId = "'+params.ids[2]+'"');
+                    
                     connection.release();
 
                     // send the notification
                     const notificationResult = await send_notification('✅ Your appointment is cancelled', rows1[0].gcm_regId, 'Single');
+                    const notificationResult1 = await send_notification('✅ Appointment for '+dayjs().format('DD-MM-YYYY HH:mm A')+' is cancelled', rows2[0].gcm_regId, 'Single');
                     
                     // return successful update
-                    return Response.json({status: 200, message:'Updated!',notification: notificationResult,}, {status: 200})
+                    return Response.json({status: 200, message:'Updated!',notification: notificationResult,notification1: notificationResult1,}, {status: 200})
                 } catch (error) { // error updating
                     return Response.json({status: 404, message:'No request found!'+error.message}, {status: 200})
                 }
@@ -158,8 +162,8 @@ export async function GET(request,{params}) {
             else if(params.ids[1] == 'S5'){ 
                 try {
                     const [rows, fields] = await connection.execute('UPDATE psych_appointment SET requestDate="'+params.ids[3]+'", updatedOn="'+currentDate+'" where appointmentId = "'+params.ids[2]+'"');
-                    // get the player Id of user using collegeId
-                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from user where collegeId = "'+params.ids[5]+'"');
+                    // get the player Id of users using collegeId
+                    const [rows1, fields1] = await connection.execute('SELECT gcm_regId from users where collegeId = "'+params.ids[5]+'"');
                     connection.release();
 
                     // send the notification

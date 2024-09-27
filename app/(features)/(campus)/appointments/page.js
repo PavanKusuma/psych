@@ -883,7 +883,9 @@ const handleCourseChange = (newCourse) => {
           <div className={dmSans.className} style={{height:'8vh',display:'flex',flexDirection:'column',justifyContent:'space-around', marginTop:'20px'}}>
               {/* <h1 className="text-3xl font-bold leading-normal">Appointments</h1> */}
               <div className={styles.horizontalsection}>
-                <h1 className="text-3xl font-bold leading-normal">Appointments</h1>
+              <div className={`${dmSerifText.className}`} >
+                <h1 className="text-3xl font-bold leading-normal ">Appointments</h1>
+                </div>
                 {searching ? <div className="flex flex-row items-center"><SpinnerGap className={`${styles.icon} ${styles.load}`} /> Loading...</div> : ''}
               </div>
               <p className="text-sm text-slate-500">Received based on your availability</p>

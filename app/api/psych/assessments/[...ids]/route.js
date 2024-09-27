@@ -45,7 +45,7 @@ export async function GET(request,{params}) {
                             FROM psych_assessments a
                             LEFT JOIN (SELECT assessmentId, collegeId, createdOn FROM psych_answers order by createdOn DESC LIMIT 1) ans 
                             ON a.assessmentId = ans.assessmentId AND ans.collegeId = ?
-                            WHERE a.campusId = ?`;
+                            WHERE a.campusId = ? ORDER BY a.createdOn ASC`;
                     // query = 'SELECT * FROM psych_assessments WHERE campusId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
                     const [rows, fields] = await connection.execute(query, [params.ids[4], params.ids[3]]);
                     connection.release();

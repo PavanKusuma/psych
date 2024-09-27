@@ -456,7 +456,9 @@ function downloadNow(resultId) {
         <div className={dmSans.className} style={{display:'flex',flexDirection:'column',justifyContent:'space-around', marginTop:'12px'}}>
             
             <div className={styles.horizontalsection}>
-                <h1 className="text-3xl font-bold leading-normal">{searchParams.title}</h1>
+                <div className={`${dmSerifText.className}`} >        
+                    <h1 className="text-3xl font-bold leading-normal">{searchParams.title}</h1>
+                </div>
                 {(allResults.length == 0) ? <SpinnerGap className={`${styles.icon} ${styles.load}`} /> : ''}
             </div>
             <p className="text-sm text-slate-500">Assessment Results</p>

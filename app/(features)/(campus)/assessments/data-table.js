@@ -517,16 +517,16 @@ async function declineAppointment(row){
       {/* search input for filtering columns */}
       {/* search input for filtering columns */}
       <div className="flex items-center py-2" style={{display:'flex', justifyContent:'space-between'}}>
-        <Input
-          placeholder="Filter students by CollegeId"
+        {/* <Input
+          placeholder="Search Assessments by name"
           value={(table.getColumn("assessmentId")?.getFilterValue()) ?? ""}
           onChange={(event) =>
             table.getColumn("assessmentId")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
-        />
-        &nbsp;
-        &nbsp;
+        /> 
+         &nbsp;
+        &nbsp; */}
         <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredRowModel().rows.length} assessments.
       </div>

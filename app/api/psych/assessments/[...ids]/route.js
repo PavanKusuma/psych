@@ -100,7 +100,8 @@ export async function GET(request,{params}) {
                         // check what type of requests to be shown
 
                         query1 = 'SELECT * FROM psych_results where assessmentId = "'+params.ids[3]+'"';
-                        query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                        query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params.ids[3]+'" ORDER BY createdOn DESC';
+                        // query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
                         
                         // console.log(query1);
                         const [rows, fields] = await connection.execute(query1);
@@ -126,7 +127,7 @@ export async function GET(request,{params}) {
 
                         // check what type of requests to be shown
 
-                        query2 = `SELECT username, collegeId, campusId, email, gender, phoneNumber, course, branch, year FROM users where collegeId IN (${formattedIds})`;
+                        query2 = `SELECT username, collegeId, campusId, email, gender, phoneNumber, course, branch, year, section FROM users where collegeId IN (${formattedIds})`;
                         
                         // console.log(query2);
                         const [rows1, fields1] = await connection.execute(query2);
@@ -136,6 +137,39 @@ export async function GET(request,{params}) {
                         if(rows1.length > 0){
                             // return the requests data
                             return Response.json({status: 200, message:'Data found!', data: rows1}, {status: 200})
+
+                        }
+                        else {
+                            // user doesn't exist in the system
+                            return Response.json({status: 404, message:'No new requests!'}, {status: 200})
+                        }
+                    }
+
+                    // get list of assessments taken by student
+                    else if(params.ids[2] == 4){
+                        let query1 = '';
+                        
+                        // check what type of requests to be shown
+                        query1 = 'SELECT *, aa.title as assessmentTitle, a.createdOn as assessedOn FROM psych_answers a JOIN psych_assessments aa ON a.assessmentId=aa.assessmentId JOIN psych_results r ON a.resultId=r.resultId where collegeId = "'+params.ids[3]+'"';
+                        const [rows1, fields1] = await connection.execute(query1);
+                        
+                        var questions = [];
+                        const promises1 = rows1.map(async (row) => {
+                            let query2 = 'SELECT * FROM psych_questions where assessmentId = "'+row.assessmentId+'"';
+                            const [rows2, fields2] = await connection.execute(query2);
+                            rows2.map((row11) => {
+                                questions.push(row11);
+                            })
+                        });
+                        await Promise.all(promises1);
+                        
+
+                        connection.release();
+
+                        // check if user is found
+                        if(rows1.length > 0){
+                            // return the requests data
+                            return Response.json({status: 200, message:'Data found!', data: rows1, questions: questions}, {status: 200})
 
                         }
                         else {

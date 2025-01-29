@@ -22,7 +22,7 @@ import { Inter, DM_Sans, DM_Serif_Text } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 const dmSans = DM_Sans({ subsets: ['latin'] })
 const dmSerifText = DM_Serif_Text({weight: "400", subsets: ['latin'] })
-import { Check, Info, SpinnerGap, X, Plus, ArrowBendUpLeft, Watch, MapPin } from 'phosphor-react'
+import { Check, Info, SpinnerGap, X, ClipboardText, ArrowBendUpLeft, Watch, MapPin } from 'phosphor-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from "recharts"
 import { Input } from '@/app/components/ui/input';
@@ -151,7 +151,7 @@ fetch("/api/psych/admin/appointments/"+pass+"/"+role+"/S1/"+statuses+"/"+offset+
 
   // get the appointments taken so far by student
   const getBasicStudentData = async (pass, studentId) => 
-    fetch("/api/user/"+pass+"/U2/"+studentId, {
+    fetch("/api/user/"+pass+"/U2.1/"+studentId, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -162,6 +162,16 @@ fetch("/api/psych/admin/appointments/"+pass+"/"+role+"/S1/"+statuses+"/"+offset+
   // get the appointments taken so far by student
   const getAppointmentsOfStudentData = async (pass, studentId, campusId) => 
     fetch("/api/psych/appointments/"+pass+"/PsychAdmin/S2/All/0/"+studentId, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+    });
+
+  // get the assessments taken so far by student
+  const getAssessmentsOfStudentData = async (pass, studentId) => 
+    fetch("/api/psych/assessments/"+pass+"/PsychAdmin/4/"+studentId, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -215,6 +225,8 @@ export default function Appointments() {
 
     
     const [studentAppointmentsList, setStudentAppointmentsList] = useState([]);
+    const [studentAssessmentsList, setStudentAssessmentsList] = useState([]);
+    const [studentAssessmentsQuestionsList, setStudentAssessmentsQuestionsList] = useState([]);
     const [searchingAppointments, setSearchingAppointments] = useState(false);
     const [searchingMood, setSearchingMood] = useState(false);
     // const chartData = [
@@ -286,7 +298,7 @@ export default function Appointments() {
     const handleCompleteClick = (row, notes) => {
         
         setLoadingIds(prev => new Set(prev.add(row.getValue('appointmentId'))));
-        console.log(notes);
+        // console.log(notes);
 
         // Simulate API call
         completeAppointment(row, notes, handleRemoveAppointment, () => {
@@ -418,7 +430,7 @@ export default function Appointments() {
                 paramBranchYears = 'All';
             }
             // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, 
-            console.log("/api/psych/admin/appointments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/S1/"+status+"/"+0+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+selectedCampus);
+            // console.log("/api/psych/admin/appointments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/S1/"+status+"/"+0+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+selectedCampus);
             const result  = await getAllAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS, 
                 JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, 
                 status, 
@@ -428,7 +440,7 @@ export default function Appointments() {
             // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, status, 0, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId, 'CSE,IT', 'All', '111', '0', JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).campusId, dates, 'BTECH-IT-2,BTECH-IT-3')
             const queryResult = await result.json() // get data
 
-            console.log(queryResult);
+            // console.log(queryResult);
             // check for the status
             if(queryResult.status == 200){
 
@@ -499,17 +511,17 @@ export default function Appointments() {
     
     // get appointments of a specific receiver
     async function getAppointmentsOfStudent(studentId){
-          console.log(studentId);
+        //   console.log(studentId);
           
       setSearchingAppointments(true);
       // setSenderMessagesList([]);
       // setOffset(offset+10); // update the offset for every call
   
       try {    
-          const result0  = await getBasicStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
-          const queryResult0 = await result0.json() // get data
-          console.log(queryResult0);
-
+        
+        const result0  = await getBasicStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
+        const queryResult0 = await result0.json() // get data
+          
           setShowStudent(true);
 
           if(queryResult0.status == 200){
@@ -518,7 +530,7 @@ export default function Appointments() {
 
                 const result  = await getAppointmentsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
                 const queryResult = await result.json() // get data
-                console.log(queryResult);
+                
                 // check for the status
                 if(queryResult.status == 200){
         
@@ -527,10 +539,24 @@ export default function Appointments() {
                     }   
                     
                 }
+                
+                const result1  = await getAssessmentsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
+                const queryResult1 = await result1.json() // get data
+                
+                // check for the status
+                if(queryResult1.status == 200){
+        
+                    if(queryResult1.data.length > 0){
+                        setStudentAssessmentsList(queryResult1.data);
+                        setStudentAssessmentsQuestionsList(queryResult1.questions);
+                    }   
+                    
+                }
+
                 setSearchingAppointments(false);
 
                 getMoodMetricsOfStudent(studentId);
-                setSelectedShowStudent(studentId);
+                // setSelectedShowStudent(studentId);
                 // setShowStudent(true);
                 
             }
@@ -555,18 +581,16 @@ export default function Appointments() {
         // this is for the list of moods
         const result1  = await getMoodMetricsOfStudentData1(process.env.NEXT_PUBLIC_API_PASS, studentId)
         const queryResult1 = await result1.json() // get data
-        console.log(queryResult1);
-
+        
         // this is for the graph, which looks consolidated
         const result2  = await getMoodMetricsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
         const queryResult2 = await result2.json() // get data
-        console.log(queryResult2);
         
-    
-
+        if(queryResult1.data != null)
         if(queryResult1.data.length > 0){
             setAllMoodCheckins(queryResult1.data);
         }
+        if(queryResult2.data != null)
         if(queryResult2.data.length > 0){
             const formattedData = queryResult2.data.map(item => ({
                 ...item,
@@ -576,7 +600,7 @@ export default function Appointments() {
                 Sad: parseInt(item.Sad),
                 Fear: parseInt(item.Fear)
                 }))
-            console.log(formattedData);
+            
             
             // setChartData(formattedData)
             setMoodCheckin15Days(formattedData);
@@ -797,111 +821,27 @@ function updateOffset(value) {
     setOffset(offset+20);
     getAllRequests(value, initialDatesValues.from,initialDatesValues.to);
 }
-const handleCampusChange = (newCampusId) => {
-    console.log(newCampusId);
-    setSelectedCampus(newCampusId);
 
-    campuses.map((campus) => {
-                    
-        if(campus.campusId == newCampusId){
-            setCourses(campus.courses.split(','));
-        }
-    })
-  };
-const handleCourseChange = (newCourse) => {
-    console.log(newCourse);
-    setSelectedCourse(newCourse);
-
-    campuses.map((campus) => {
-                    
-        if(campus.campusId == selectedCampus){
+  function getOptions(question, assessmentId){
+    // parse through each question and get the respective answers.
+    const assessmentOptions1 = [];
+    
+        for (let j = 1; j <= question.options; j++) {
             
-            let depts = campus.departments.split(',');
-            var selectedDepts = [];
-            depts.map((dept) => {
-                if(dept.includes(newCourse)){
-                    selectedDepts.push(dept);
-                }
-            })
-            setDepartments(selectedDepts);
-            console.log(selectedDepts);
+            assessmentOptions1.push(question[`option${j}`]);
+          }
+        // question.
+        const correctOptions = studentAssessmentsList.find(a => a.assessmentId === assessmentId).answers.split(',').map(item => {
+            const [sequence, correctOption] = item.split('-');
+            return { sequence: parseInt(sequence, 10), correctOption: parseInt(correctOption, 10) };
+        })
 
-            setBranches(Array.from(new Set(selectedDepts.map(dept => dept.split('-')[1]))));
-            console.log(Array.from(new Set(selectedDepts.map(dept => dept.split('-')[1]))));
+        // Find the correct option from the correctOptions array based on sequence
+        const correctOptionData = correctOptions.find(item => item.sequence === question.sequence-1);
 
-            setBranchYears(Array.from(new Set(selectedDepts.map(dept => {
-                const parts = dept.split('-');
-                return `${parts[1]}-${parts[2]}`;
-              }))));
-            console.log(Array.from(new Set(selectedDepts.map(dept => {
-                const parts = dept.split('-');
-                return `${parts[1]}-${parts[2]}`;
-              }))));
-            
-        }
-    })
-  };
-
-  // used to update selected branch and select corresponding branch years
-  const handleBranchChange = (branch) => {
-    let updatedSelectedBranches = [...selectedBranches];
-    let updatedSelectedBranchYears = [...selectedBranchYears];
-  
-    if (updatedSelectedBranches.includes(branch)) {
-      updatedSelectedBranches = updatedSelectedBranches.filter(b => b !== branch);
-      updatedSelectedBranchYears = updatedSelectedBranchYears.filter(by => !by.startsWith(branch));
-    } else {
-      updatedSelectedBranches.push(branch);
-      const relatedBranchYears = branchYears.filter(by => by.startsWith(branch));
-      updatedSelectedBranchYears = [...new Set([...updatedSelectedBranchYears, ...relatedBranchYears])];
-    }
-  
-    setSelectedBranches(updatedSelectedBranches);
-    setSelectedBranchYears(updatedSelectedBranchYears);
-    console.log(updatedSelectedBranchYears);
-  };
-
-  // used to update branch years and select/deselect corresponding branches
-  const handleBranchYearChange = (branchYear) => {
-    let updatedSelectedBranchYears = [...selectedBranchYears];
-    const branch = branchYear.split('-')[0];
-  
-    if (updatedSelectedBranchYears.includes(branchYear)) {
-      updatedSelectedBranchYears = updatedSelectedBranchYears.filter(by => by !== branchYear);
-    } else {
-      updatedSelectedBranchYears.push(branchYear);
-    }
-  
-    const relatedBranchYears = branchYears.filter(by => by.startsWith(branch));
-    const isAllSelected = relatedBranchYears.every(by => updatedSelectedBranchYears.includes(by));
-  
-    let updatedSelectedBranches = [...selectedBranches];
-    if (isAllSelected) {
-      if (!updatedSelectedBranches.includes(branch)) {
-        updatedSelectedBranches.push(branch);
-      }
-    } else {
-      updatedSelectedBranches = updatedSelectedBranches.filter(b => b !== branch);
-    }
-  
-    setSelectedBranchYears(updatedSelectedBranchYears);
-    setSelectedBranches(updatedSelectedBranches);
-
-    console.log(updatedSelectedBranchYears);
-  };
-
-//   function acceptAppointment(row) {
-//     // logic to edit the row with this id
-//     console.log('Editing row with id:', row);
-//     console.log('Editing row with id:', row.getValue("requestStatus"));
-//   }
-  
-  function printRequests() {
-    // logic to edit the row with this id
-    console.log('Editing row with id:');
-    console.log(requests);
+        return question[`option${correctOptionData.correctOption + 1}`];
+    // return assessmentOptions1;
   }
-  
     
   
     
@@ -984,7 +924,7 @@ const handleCourseChange = (newCourse) => {
             </div>
         </div>
 
-        <div>
+        {/* <div>
             <Tabs defaultValue={statusHere} className="w-[400px]">
                 <TabsList>
                 <TabsTrigger value="Appointments" onClick={()=>changeStatus('Appointments')}>Appointments</TabsTrigger>
@@ -992,13 +932,92 @@ const handleCourseChange = (newCourse) => {
                 <TabsTrigger value="Mood" onClick={()=>changeStatus('Mood')}>Mood Metrics</TabsTrigger>
                 </TabsList>
             </Tabs>
-        </div>
+        </div> */}
     
         <div className={dmSans.className} style={{height:'8vh',display:'flex',flexDirection:'column',justifyContent:'space-around', marginTop:'20px'}}>
          
-            <div className="flex flex-row gap-2 max-h-screen">
-                <div className="w-8/12 overflow-scroll">
-                    <p className="text-lg text-black font-bold pt-2 uppercase">Appointments</p>
+            <div className="flex flex-col gap-4 max-h-screen">
+                <Card className='flex flex-col gap-2 p-2 w-full'>
+                <p className="text-lg text-black font-bold p-2 uppercase">Assessments</p>
+                    {searchingAppointments ? 
+                        <div className={styles.horizontalsection}>
+                            <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                            <p className={`${inter.className} ${styles.text3}`}>Fetching data ...</p> 
+                        </div> : 
+                                    
+                        
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Result Range</TableHead>
+                                <TableHead>Result</TableHead>
+                                <TableHead>Assessed on</TableHead>
+                                <TableHead></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {studentAssessmentsList.map((row, dayIndex) => (
+                            // {allStudents.map((row) => (
+                                <TableRow key={dayIndex} >
+                                    <TableCell className="py-2">{row.assessmentTitle}<br/>
+                                    </TableCell>
+                                    <TableCell>{row.result}</TableCell>
+                                    <TableCell>{row.title}</TableCell>
+                                    <TableCell>{dayjs.utc(row.assessedOn).format("DD MMM YYYY")}</TableCell>
+                                    <TableCell>
+                                    
+                                            <Sheet>
+                                                <SheetTrigger asChild>
+                                                    <Button className="mx-2 px-2" ><ClipboardText size={24}/> &nbsp;View Assessment</Button>            
+                                                    {/* <Button variant='outline' className="mx-2 px-2 text-green-600" onClick={()=>selectDealerForUpdate(row)}><PencilSimpleLine size={24} className="text-green-600"/> &nbsp;Edit</Button>             */}
+                                                </SheetTrigger>
+                                                <SheetContent>
+                                                    <SheetHeader>
+                                                        <SheetTitle>Assessment Answers</SheetTitle>
+                                                        <SheetDescription>
+                                                            {/* {row.username}<br/> */}
+                                                            {row.collegeId}<br/>
+                                                            {/* {row.campusId}<br/>{row.branch} - {row.year} year */}
+                                                        </SheetDescription>
+                                                    </SheetHeader>
+                                                    <div className="grid gap-4 py-4 h-5/6 overflow-scroll">
+                                                        
+                                                        <div className="flex flex-col py-2 gap-2">
+                                                            
+                                                            {studentAssessmentsQuestionsList
+                                                                .filter(question => question.assessmentId == row.assessmentId)
+                                                                .sort((a, b) => a.sequence - b.sequence)
+                                                                .map((question, dayIndex) => (
+                                                                    <Card className='flex flex-col p-2 gap-2' key={dayIndex}>
+                                                                    <p className='text-slate-700'>{question.sequence}.&nbsp;{question.question}</p>
+                                                                    <p className='text-black font-semibold'>{getOptions(question, row.assessmentId)}</p>
+                                                                    </Card>
+                                                                ))
+                                                                }
+                                                        </div>
+                                                        <Separator />
+                                                        
+                                                        
+                                                    </div>
+                                                    {/* <SheetFooter>
+                                                    <SheetClose asChild>
+                                                        <Button type="submit" className="bg-blue-600 text-white" onClick={()=>updateDealer(row.id)}>Update</Button>
+                                                    </SheetClose>
+                                                    </SheetFooter> */}
+                                                </SheetContent>
+                                            </Sheet> 
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    }
+                </Card>
+                
+                {/* <div className="w-8/12 overflow-scroll"> */}
+                <Card className='flex flex-col gap-2 p-2 w-full'>
+                    <p className="text-lg text-black font-bold p-2 uppercase">Appointments</p>
                     {searchingAppointments ? 
                         <div className={styles.horizontalsection}>
                             <SpinnerGap className={`${styles.icon} ${styles.load}`} />
@@ -1007,6 +1026,7 @@ const handleCourseChange = (newCourse) => {
                                     
                         <div>
                         {
+                        (studentAppointmentsList.length > 0) ?
                         studentAppointmentsList.map((appointment) => 
                             <Card key={appointment.appointmentId} value={appointment.appointmentId} className='flex flex-row gap-10 p-4 my-2 items-start'>
                                 <div className="flex flex-col gap-1 p-2 items-center min-w-max">
@@ -1024,26 +1044,33 @@ const handleCourseChange = (newCourse) => {
                                 </div>
                             </Card>
                             )
+                        
+                        :
+                        <p className="text-sm text-slate-500">No appointments available!</p>
                         }
                         </div>
+                        
                     }
-                </div>
+                </Card>
+                {/* </div> */}
                 
-                <div className="w-4/12 overflow-scroll">
-                    <p className="text-lg text-black font-bold pt-2 uppercase">Mood Metrics</p>
-                    {searchingMood ? 
-                        <div className={styles.horizontalsection}>
-                            <SpinnerGap className={`${styles.icon} ${styles.load}`} />
-                            <p className={`${inter.className} ${styles.text3}`}>Fetching mood metrics data ...</p> 
-                        </div> : 
+                {/* <div className="w-4/12 overflow-scroll"> */}
+                <Card className='flex flex-col gap-2 p-2 w-full'>
+                    <p className="text-lg text-black font-bold p-2 uppercase">Mood Metrics</p>
+                    
                                     
-                        <div className="flex flex-col gap-2 my-2">
-                            <Card>
-                                <CardHeader>
+                        
+                            {/* <Card className='flex flex-col gap-2 p-2 w-full'> */}
+                                {/* <CardHeader>
                                     <CardTitle>Mood Check-in Breakdown</CardTitle>
                                     <CardDescription>Hover on the graph to view details</CardDescription>
-                                </CardHeader>
+                                </CardHeader> */}
                                 <CardContent>
+                                {searchingMood ? 
+                                    <div className={styles.horizontalsection}>
+                                        <SpinnerGap className={`${styles.icon} ${styles.load}`} />
+                                        <p className={`${inter.className} ${styles.text3}`}>Fetching mood metrics data ...</p> 
+                                    </div> : 
                                     <ChartContainer config={chartConfig}>
                                     <BarChart accessibilityLayer data={moodCheckin15Days}>
                                         <CartesianGrid strokeDasharray="3 3" />
@@ -1068,40 +1095,33 @@ const handleCourseChange = (newCourse) => {
                                         />
                                     </BarChart>
                                     </ChartContainer>
+                                    }
                                 </CardContent>
-                                {/* <CardFooter className="flex-col items-start gap-2 text-sm">
-                                    <div className="flex gap-2 font-medium leading-none">
-                                    Trending up by 5.2% this month 
-                                    </div>
-                                    <div className="leading-none text-muted-foreground">
-                                    Showing total visitors for the last 6 months
-                                    </div>
-                                </CardFooter> */}
+                                <CardFooter className="flex-col items-start gap-2 text-sm">
+                                {
+                                    allMoodCheckins.map((mood) => 
+                                        <Card key={mood.Date} value={mood.Date} className='flex flex-row gap-10 p-4'>
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-sm text-slate-600 flex flex-row items-center"> &nbsp;{dayjs(mood.createdOn).format("DD MMM YYYY hh:mm A")} </p>
+                                                <div className="flex flex-row">
+                                                    <p className="text-md text-slate-500">Mood:&nbsp;</p>
+                                                    <p className="text-md text-black">{mood.emotion}</p>
+                                                </div>
+                                                <div className="flex flex-row">
+                                                    <p className="text-md text-slate-500">Feeling:&nbsp;</p>
+                                                    <p className="text-md text-black">{mood.feeling}</p>
+                                                </div>
+                                                <div className="flex flex-row">
+                                                    <p className="text-md text-slate-500">More:&nbsp;</p>
+                                                    <p className="text-md text-black">{mood.description}</p>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                        )
+                                    }
+                                </CardFooter>
                                 </Card>
-                        {
-                        allMoodCheckins.map((mood) => 
-                            <Card key={mood.Date} value={mood.Date} className='flex flex-row gap-10 p-4'>
-                                <div className="flex flex-col gap-2">
-                                    <p className="text-sm text-slate-600 flex flex-row items-center"> &nbsp;{dayjs(mood.createdOn).format("DD MMM YYYY hh:mm A")} </p>
-                                    <div className="flex flex-row">
-                                        <p className="text-md text-slate-500">Mood:&nbsp;</p>
-                                        <p className="text-md text-black">{mood.emotion}</p>
-                                    </div>
-                                    <div className="flex flex-row">
-                                        <p className="text-md text-slate-500">Feeling:&nbsp;</p>
-                                        <p className="text-md text-black">{mood.feeling}</p>
-                                    </div>
-                                    <div className="flex flex-row">
-                                        <p className="text-md text-slate-500">More:&nbsp;</p>
-                                        <p className="text-md text-black">{mood.description}</p>
-                                    </div>
-                                </div>
-                            </Card>
-                            )
-                        }
-                        </div>
-                    }
-                </div>
+                {/* </Card> */}
             </div>
 
             
@@ -1375,11 +1395,11 @@ const handleCourseChange = (newCourse) => {
 
   export function acceptAppointment(row, callback) {
     // Simulate API call
-    console.log(`Accepting appointment with ID: ${row.getValue('appointmentId')}`);
+    // console.log(`Accepting appointment with ID: ${row.getValue('appointmentId')}`);
     setTimeout(() => {
         // Suppose the API call has completed
         updateAppointment(row)
-        console.log(`Appointment ${row.getValue('appointmentId')} accepted.`);
+        // console.log(`Appointment ${row.getValue('appointmentId')} accepted.`);
         callback();  // Call the callback function passed
     }, 2000); // Simulate a delay
 }
@@ -1410,7 +1430,7 @@ const handleCourseChange = (newCourse) => {
       try {    
           var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD");
           
-          console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S1/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId'));
+        //   console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S1/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId'));
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S1/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId'))
           const queryResult = await result.json() // get data
 
@@ -1439,7 +1459,7 @@ const handleCourseChange = (newCourse) => {
       try {    
           var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD hh:mm:ss");
           
-          console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes);
+        //   console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes);
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S3/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).username+"/"+updatedOn+"/"+row.getValue('collegeId')+"/"+notes)
           const queryResult = await result.json() // get data
 
@@ -1468,7 +1488,7 @@ const handleCourseChange = (newCourse) => {
       try {    
           var updatedOn = dayjs(new dayjs()).format("YYYY-MM-DD");
           
-          console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'));
+        //   console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'));
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'))
           const queryResult = await result.json() // get data
 
@@ -1502,13 +1522,13 @@ async function declineAppointment(row){
           var updatedOn = dayjs(today).format("YYYY-MM-DD");
           
           // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, 
-          console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'));
+        //   console.log("/api/psych/updateappointment/"+process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'));
           const result  = await updateAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS+"/S4/"+row.getValue('appointmentId')+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+row.getValue('collegeId'))
           
           // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, status, 0, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId, 'CSE,IT', 'All', '111', '0', JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).campusId, dates, 'BTECH-IT-2,BTECH-IT-3')
           const queryResult = await result.json() // get data
 
-          console.log(queryResult);
+        //   console.log(queryResult);
           // check for the status
           if(queryResult.status == 200){
 

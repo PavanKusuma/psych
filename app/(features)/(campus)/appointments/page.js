@@ -240,7 +240,7 @@ export default function Appointments() {
         setShowBlockOuting(!showBlockOuting)
     }
     const getDataData = async () => {
-        console.log("Hello1");
+        // console.log("Hello1");
     }
 
     ///////////////////////////////
@@ -267,7 +267,7 @@ export default function Appointments() {
     const handleCompleteClick = (row, notes) => {
         
         setLoadingIds(prev => new Set(prev.add(row.getValue('appointmentId'))));
-        console.log(notes);
+        // console.log(notes);
 
         // Simulate API call
         completeAppointment(row, notes, handleRemoveAppointment, () => {
@@ -399,7 +399,7 @@ export default function Appointments() {
                 paramBranchYears = 'All';
             }
             // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, 
-            console.log("/api/psych/admin/appointments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/S1/"+status+"/"+0+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+selectedCampus);
+            // console.log("/api/psych/admin/appointments/"+process.env.NEXT_PUBLIC_API_PASS+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role+"/S1/"+status+"/"+0+"/"+JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId+"/"+selectedCampus);
             const result  = await getAllAppointmentsDataAPI(process.env.NEXT_PUBLIC_API_PASS, 
                 JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, 
                 status, 
@@ -409,7 +409,7 @@ export default function Appointments() {
             // const result  = await getAllRequestsDataAPI(process.env.NEXT_PUBLIC_API_PASS, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).role, status, 0, JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).collegeId, 'CSE,IT', 'All', '111', '0', JSON.parse(decodeURIComponent(biscuits.get('sc_user_detail'))).campusId, dates, 'BTECH-IT-2,BTECH-IT-3')
             const queryResult = await result.json() // get data
 
-            console.log(queryResult);
+            // console.log(queryResult);
             // check for the status
             if(queryResult.status == 200){
 
@@ -480,7 +480,7 @@ export default function Appointments() {
     
     // get appointments of a specific receiver
     async function getAppointmentsOfStudent(studentId){
-          console.log(studentId);
+        //   console.log(studentId);
           
       setSearchingAppointments(true);
       // setSenderMessagesList([]);
@@ -489,7 +489,7 @@ export default function Appointments() {
       try {    
           const result  = await getAppointmentsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
           const queryResult = await result.json() // get data
-          console.log(queryResult);
+        //   console.log(queryResult);
           // check for the status
           if(queryResult.status == 200){
   
@@ -534,12 +534,12 @@ export default function Appointments() {
         // this is for the list of moods
         const result1  = await getMoodMetricsOfStudentData1(process.env.NEXT_PUBLIC_API_PASS, studentId)
         const queryResult1 = await result1.json() // get data
-        console.log(queryResult1);
+        // console.log(queryResult1);
 
         // this is for the graph, which looks consolidated
         const result2  = await getMoodMetricsOfStudentData(process.env.NEXT_PUBLIC_API_PASS, studentId)
         const queryResult2 = await result2.json() // get data
-        console.log(queryResult2);
+        // console.log(queryResult2);
         
     
 
@@ -555,7 +555,7 @@ export default function Appointments() {
                 Sad: parseInt(item.Sad),
                 Fear: parseInt(item.Fear)
                 }))
-            console.log(formattedData);
+            // console.log(formattedData);
             
             // setChartData(formattedData)
             setMoodCheckin15Days(formattedData);
@@ -769,7 +769,7 @@ function updateOffset(value) {
     getAllRequests(value, initialDatesValues.from,initialDatesValues.to);
 }
 const handleCampusChange = (newCampusId) => {
-    console.log(newCampusId);
+    // console.log(newCampusId);
     setSelectedCampus(newCampusId);
 
     campuses.map((campus) => {
@@ -780,7 +780,7 @@ const handleCampusChange = (newCampusId) => {
     })
   };
 const handleCourseChange = (newCourse) => {
-    console.log(newCourse);
+    // console.log(newCourse);
     setSelectedCourse(newCourse);
 
     campuses.map((campus) => {
@@ -795,19 +795,19 @@ const handleCourseChange = (newCourse) => {
                 }
             })
             setDepartments(selectedDepts);
-            console.log(selectedDepts);
+            // console.log(selectedDepts);
 
             setBranches(Array.from(new Set(selectedDepts.map(dept => dept.split('-')[1]))));
-            console.log(Array.from(new Set(selectedDepts.map(dept => dept.split('-')[1]))));
+            // console.log(Array.from(new Set(selectedDepts.map(dept => dept.split('-')[1]))));
 
             setBranchYears(Array.from(new Set(selectedDepts.map(dept => {
                 const parts = dept.split('-');
                 return `${parts[1]}-${parts[2]}`;
               }))));
-            console.log(Array.from(new Set(selectedDepts.map(dept => {
-                const parts = dept.split('-');
-                return `${parts[1]}-${parts[2]}`;
-              }))));
+            // console.log(Array.from(new Set(selectedDepts.map(dept => {
+            //     const parts = dept.split('-');
+            //     return `${parts[1]}-${parts[2]}`;
+            //   }))));
             
         }
     })
@@ -829,7 +829,7 @@ const handleCourseChange = (newCourse) => {
   
     setSelectedBranches(updatedSelectedBranches);
     setSelectedBranchYears(updatedSelectedBranchYears);
-    console.log(updatedSelectedBranchYears);
+    // console.log(updatedSelectedBranchYears);
   };
 
   // used to update branch years and select/deselect corresponding branches
@@ -858,7 +858,7 @@ const handleCourseChange = (newCourse) => {
     setSelectedBranchYears(updatedSelectedBranchYears);
     setSelectedBranches(updatedSelectedBranches);
 
-    console.log(updatedSelectedBranchYears);
+    // console.log(updatedSelectedBranchYears);
   };
 
 //   function acceptAppointment(row) {

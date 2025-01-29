@@ -56,6 +56,27 @@ export async function GET(request,{params}) {
                     return Response.json({status: 404, message:'No user found!'}, {status: 200})
                 }
             }
+            // get primary details of the user
+            else if(params.ids[1] == 'U2.1'){
+                try {
+                    const [rows, fields] = await connection.execute('SELECT * FROM users WHERE collegeId = "'+params.ids[2]+'"');
+                    connection.release();
+                    // return successful update
+
+                    // check if user is found
+                    if(rows.length > 0){
+                        // return the requests data
+                        return Response.json({status: 200, data: rows[0], message:'Updated!'}, {status: 200})
+
+                    }
+                    else {
+                        // user doesn't exist in the system
+                        return Response.json({status: 201, message:'No parents data found!'}, {status: 200})
+                    }
+                } catch (error) { // error updating
+                    return Response.json({status: 404, message:'No user found!'}, {status: 200})
+                }
+            }
             // search for user details by "collegeId"
             else if(params.ids[1] == 'U3'){
                 try {

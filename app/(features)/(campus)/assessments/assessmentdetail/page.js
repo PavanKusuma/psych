@@ -13,6 +13,10 @@ import styles from '../../../../../app/page.module.css'
 import { useRouter } from 'next/navigation'
 const biscuits = new Biscuits
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import Toast from '../../../../components/myui/toast';
 import { Button } from "@/app/components/ui/button"
 // import { Table, TableHead, TableRow, TableCell, TableBody } from "@/app/components/ui/table"
@@ -98,8 +102,8 @@ function adjustColor(color, percent) {
     return `#${RR}${GG}${BB}`;
   }
   
-  // Base color similar to #fff7cf
-  const baseColor = '#fff7cf';
+  // Base color similar to #fffdcf #ffe9cf #cfffe7
+  const baseColor = '#cfebff';
 
 // verification using college Id
 // In future, based on the type of the user verification can be succeded
@@ -126,6 +130,9 @@ export default function AssessmentDetail({ searchParams}) {
     const [allAnswers, setAllAnswers] = useState([]);
     const [allResults, setAllResults] = useState([]);
     const [allStudents, setAllStudents] = useState([]);
+    const [uniqueBranches, setUniqueBranches] = useState([]);
+    const [uniqueYears, setUniqueYears] = useState([]);
+    
     const [assessmentId, setAssessmentId] = useState(searchParams.id);
     const [assessmentTitle, setAssessmentTitle] = useState(searchParams.title);
     const [assessmentType, setAssessmentType] = useState(searchParams.type);
@@ -134,8 +141,10 @@ export default function AssessmentDetail({ searchParams}) {
     const [errorMsg, seterrorMsg] = useState('');
 
     // Get unique result types and assign a shade
-    const [shades, setShades] = useState([]);
+    const [shades, setShades] = useState(['#cfffe7','#fffdcf','#ffe9cf']);
     const [selectedResultType, setSelectedResultType] = useState("All result types");
+    const [selectedBranchType, setSelectedBranchType] = useState("All Branches");
+    const [selectedYearType, setSelectedYearType] = useState("All Years");
 
 
     // this is to save the jsonResult for verification
@@ -207,11 +216,38 @@ export default function AssessmentDetail({ searchParams}) {
                 console.log(resultData2);
                 setAllStudents(resultData2.data);
 
+                // set unique branches
+                const uniqueBranches1 = [];
+                resultData2.data.forEach(student => {
+                    if (!uniqueBranches1.includes(student.branch)) {
+                        uniqueBranches1.push(student.branch);
+                    }
+                });
+                setUniqueBranches(uniqueBranches1);
+                
+                // set unique years
+                const uniqueYears1 = [];
+                resultData2.data.forEach(student => {
+                    if (!uniqueYears1.includes(student.year)) {
+                        uniqueYears1.push(student.year);
+                    }
+                });
+                setUniqueYears(uniqueYears1);
+
+                // const uniqueBranchYear = [];
+                // resultData2.data.forEach(student => {
+                //     const branchYear = `${student.branch}_${student.year}`;
+                //     if (!uniqueBranchYear.includes(branchYear)) {
+                //         uniqueBranchYear.push(branchYear);
+                //     }
+                // });
+                // setUniqueBranches(uniqueBranchYear);
+
                 // Get unique result types and assign a shade
                 const shades = sortedData.map((item, index) => {
                     return adjustColor(baseColor, index * -10); // Darken by 10% for each item
                 });
-                setShades(shades);
+                // setShades(shades);
 
                 // get the selected assessement's questions and answers
                 getQuestionAnswersOfAssessment(searchParams.id);
@@ -251,21 +287,111 @@ export default function AssessmentDetail({ searchParams}) {
  const handleResultTypeChange = (e) => {
     setSelectedResultType(e);
   };
+ const handleBranchTypeChange = (e) => {
+    setSelectedBranchType(e);
+    
+
+    // Function to filter students based on result type
+    // filteredStudents = allStudents.filter((student) => {
+    //     if (selectedResultType === "All result types" || selectedResultType === "All Branches" || selectedResultType === "All Years") {
+    //         return true; // Show all students when "All result types" is selected
+    //     }
+    //     else {
+    //         if (!uniqueBranches1.includes(student.branch)) {
+    //             uniqueBranches1.push(student.branch);
+    //         }
+    //     }
+    // });
+  };
+ const handleYearTypeChange = (e) => {
+    setSelectedYearType(e);
+  };
 
   // Function to filter students based on result type
   const filteredStudents = allStudents.filter((student) => {
-    if (selectedResultType === "All result types") {
+    if (selectedResultType === "All result types" && selectedBranchType === "All Branches" && selectedYearType === "All Years") {
       return true; // Show all students when "All result types" is selected
     }
-    const resultData = getResultDataByCollegeId(student.collegeId);
-    return resultData.title === selectedResultType;
+    // else if(selectedResultType !== "All result types" && selectedBranchType !== "All Branches" && selectedYearType !== "All Years"){
+    //     console.log(student.title);
+    //     // console.log(student.result);
+        
+    //     if(student.title.toString() == selectedResultType && student.branch == selectedBranchType && student.year.toString() == selectedYearType.toString()){
+    //         return getResultDataByCollegeId(student.collegeId);
+    //         // return resultData.title === selectedResultType;
+    //     }
+    // }
+    else if(selectedBranchType === "All Branches" && selectedYearType === "All Years"){
+        
+        if(getResultDataByCollegeId(student.collegeId).title == selectedResultType){
+            return getResultDataByCollegeId(student.collegeId);
+        }
+    }
+    else if(selectedBranchType !== "All Branches" && selectedYearType === "All Years"){
+        
+        if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.branch == selectedBranchType){
+            return getResultDataByCollegeId(student.collegeId);
+        }
+    }
+    else if(selectedBranchType === "All Branches" && selectedYearType !== "All Years"){
+        
+        if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.year.toString() == selectedYearType.toString()){
+            return getResultDataByCollegeId(student.collegeId);
+        }
+    }
+    else if(selectedBranchType !== "All Branches" && selectedYearType !== "All Years"){
+        
+        if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.branch == selectedBranchType && student.year.toString() == selectedYearType.toString()){
+            return getResultDataByCollegeId(student.collegeId);
+        }
+    }
+    
+    // else 
+        // check if the collegeId is from selected branch
+        // if(selectedBranchType != "All Branches"){
+        // if(student.branch == selectedBranchType){
+            // // check for selected year
+            // if(selectedYearType != "All Years"){
+            //     if(student.year == selectedYearType){
+
+            //         const resultData = getResultDataByCollegeId(student.collegeId);
+            //         return resultData.title === selectedResultType;
+            //     }
+            // }
+            // else {
+                // const resultData = getResultDataByCollegeId(student.collegeId);
+                // return resultData.title === selectedBranchType;
+            // }
+            
+        // }
+    // }
+        // else {
+        //     const resultData = getResultDataByCollegeId(student.collegeId);
+        //     return resultData.title === selectedResultType;
+        // }
+        // check for selected year
+        // else if(selectedYearType != "All Years"){
+        //     console.log(selectedYearType);
+        //     console.log(student.year);
+            
+        //     if(student.year == selectedYearType){
+
+        //         const resultData = getResultDataByCollegeId(student.collegeId);
+        //         return resultData.title === selectedResultType;
+        //     }
+        // }
+    // }
+
+    
   });
 
 // Function to get the Result Data based on collegeId
 function getResultDataByCollegeId(collegeId) {
+    
+
     // Find the answer with matching collegeId
     const answer = allAnswers.find(a => a.collegeId === collegeId);
-  
+
     if (answer) {
       // Find the result with matching resultId
       const result = allResults.find(r => r.resultId === answer.resultId);
@@ -405,6 +531,42 @@ function downloadNow(resultId) {
     
 }
 
+function downloadFilteredData() {
+    
+    setDownloading(true);
+    // const result = allAnswers.filter(answer => answer.resultId == resultId);
+
+    try {
+        const uniqueCollegeIds = [...new Set(filteredStudents.map(item => item.collegeId))];
+        const commaSeparatedCollegeIds = uniqueCollegeIds.join(',');
+        
+        // call for data
+        getStudentDetailsForDownload(commaSeparatedCollegeIds);
+        
+    } catch (error) {
+        console.error("Failed to process college IDs:", error);
+    }
+    
+}
+
+function studentsDownloadNow(resultId) {
+    
+    setDownloading(true);
+    const result = allAnswers.filter(answer => answer.resultId == resultId);
+
+    try {
+        const uniqueCollegeIds = [...new Set(result.map(item => item.collegeId))];
+        const commaSeparatedCollegeIds = uniqueCollegeIds.join(',');
+        
+        // call for data
+        getStudentDetailsForDownload(commaSeparatedCollegeIds);
+        
+    } catch (error) {
+        console.error("Failed to process college IDs:", error);
+    }
+    
+}
+ 
 
     // get student details for download
     async function getStudentDetailsForDownload(data){
@@ -484,7 +646,9 @@ function downloadNow(resultId) {
                                     <Skeleton className="h-4 w-[250px]" />
                                 </div> : ''}
                     <CardTitle>Total students taken</CardTitle>
-                    <CardDescription className='text-xl'>{allResults.length}</CardDescription>
+                    {/* <CardDescription className='text-xl'>{allResults.length}</CardDescription>
+                    <CardDescription className='text-xl'>{allAnswers.length}</CardDescription> */}
+                    <CardDescription className='text-xl'>{allStudents.length}</CardDescription>
                 </CardHeader>
             </Card>
         </div>
@@ -508,7 +672,7 @@ function downloadNow(resultId) {
                     <CardTitle>{result.title}</CardTitle>
                     <CardDescription className='text-base'>
                         Result range: {result.result}<br/>
-                        Students attempted: {getUniqueStudentsCount(result.resultId)}
+                        #Attempts: {getUniqueStudentsCount(result.resultId)}
                     </CardDescription>
                     <br/>
                     <Button variant="outline" onClick={()=>downloadNow(result.resultId)}> <ArrowDown className="mr-2 h-4 w-4"/> Download</Button>
@@ -541,22 +705,62 @@ function downloadNow(resultId) {
         </div> : ''}
 
         {(allStudents.length > 0) ? 
-        <Card className='flex flex-col gap-2 p-2'>
-            <Select value={selectedResultType} onValueChange={(e)=>handleResultTypeChange(e)}>
-                <SelectTrigger className="text-black">
-                    <SelectValue placeholder="All result types" className="text-black" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                    {/* <SelectLabel className="text-black">All result types</SelectLabel> */}
-                    <SelectItem key='All result types' value='All result types' className="text-black">All result types</SelectItem>
-                        {allResults.map((row) => (
-                            <SelectItem key={row.resultId} value={row.title} className="text-black">{row.title}</SelectItem>))}
-                        {/* {allResults.filter(row => row.role === 'SalesExecutive').map((row) => (
-                            <SelectItem key={row.id} value={row.id} className="text-black">{row.name}<br/>{row.mapTo}</SelectItem>))} */}
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
+        <Card className='flex flex-col gap-2 p-2 w-full'>
+            <div className='flex flex-row gap-2 p-2'>
+                {/* result type filter */}
+                <Select value={selectedResultType} onValueChange={(e)=>handleResultTypeChange(e)}>
+                    <SelectTrigger className="text-black">
+                        <SelectValue placeholder="All result types" className="text-black" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                        {/* <SelectLabel className="text-black">All result types</SelectLabel> */}
+                        <SelectItem key='All result types' value='All result types' className="text-black">All result types</SelectItem>
+                            {allResults.map((row) => (
+                                <SelectItem key={row.resultId} value={row.title} className="text-black">{row.title}</SelectItem>))}
+                            {/* {allResults.filter(row => row.role === 'SalesExecutive').map((row) => (
+                                <SelectItem key={row.id} value={row.id} className="text-black">{row.name}<br/>{row.mapTo}</SelectItem>))} */}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                
+                {/* branch filter */}
+                <Select value={selectedBranchType} onValueChange={(e)=>handleBranchTypeChange(e)}>
+                    <SelectTrigger className="text-black">
+                        <SelectValue placeholder="All Branches" className="text-black" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                        {/* <SelectLabel className="text-black">All result types</SelectLabel> */}
+                        <SelectItem key='All Branches' value='All Branches' className="text-black">All Branches</SelectItem>
+                            {uniqueBranches.map((branch) => (
+                                <SelectItem key={branch} value={branch} className="text-black">{branch}</SelectItem>))}
+                            {/* {allResults.filter(row => row.role === 'SalesExecutive').map((row) => (
+                                <SelectItem key={row.id} value={row.id} className="text-black">{row.name}<br/>{row.mapTo}</SelectItem>))} */}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                
+                {/* branch filter */}
+                <Select value={selectedYearType} onValueChange={(e)=>handleYearTypeChange(e)}>
+                    <SelectTrigger className="text-black">
+                        <SelectValue placeholder="All Years" className="text-black" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                        {/* <SelectLabel className="text-black">All result types</SelectLabel> */}
+                        <SelectItem key='All Years' value='All Years' className="text-black">All Years</SelectItem>
+                            {uniqueYears.map((year) => (
+                                <SelectItem key={year} value={year} className="text-black">{year}</SelectItem>))}
+                            {/* {allResults.filter(row => row.role === 'SalesExecutive').map((row) => (
+                                <SelectItem key={row.id} value={row.id} className="text-black">{row.name}<br/>{row.mapTo}</SelectItem>))} */}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+
+                <Button className="mx-2 px-2" onClick={()=>downloadFilteredData()}><ArrowDown size={24}/> &nbsp;Download &nbsp;</Button>
+            </div>
+
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -587,7 +791,9 @@ function downloadNow(resultId) {
                             <TableCell>{row.year}</TableCell>
                             <TableCell>{getResultDataByCollegeId(row.collegeId).result}</TableCell>
                             <TableCell>{getResultDataByCollegeId(row.collegeId).title}</TableCell>
-                            <TableCell>{dayjs(allAnswers.find(a => a.collegeId === row.collegeId).createdOn).format("DD MMM YYYY hh:mm A")}</TableCell>
+                            <TableCell>{dayjs.utc(allAnswers.find(a => a.collegeId === row.collegeId).createdOn).format("DD MMM YYYY")}</TableCell>
+                            {/* <TableCell>{dayjs.utc(allAnswers.find(a => a.collegeId === row.collegeId).createdOn).format("DD MMM YYYY hh:mm A")}</TableCell> */}
+                            {/* <TableCell>{dayjs(allAnswers.find(a => a.collegeId === row.collegeId).createdOn).format("DD MMM YYYY hh:mm A")}</TableCell> */}
                             <TableCell>
                             
                                     <Sheet>

@@ -14,11 +14,31 @@ const client = new OneSignal.Client(process.env.ONE_SIGNAL_APPID, process.env.ON
 export async function GET(request,{params}) {
 
     // Send emails to each user with their respective OTP code
+    // const transporter = nodemailer.createTransport({
+    //     // host: 'smtp.gmail.com',
+    //     // port: 587,
+    //     // secure: false,
+    //     service: 'gmail',
+    //     auth: {
+    //       user: process.env.EMAIL,
+    //       pass: process.env.EMAIL_PWD,
+    //     },
+    //   })
+    
+    // product@heydear.me email
+    // Send emails to each user with their respective OTP code
     const transporter = nodemailer.createTransport({
-        // host: 'smtp.gmail.com',
-        // port: 587,
+        host: 'smtpout.secureserver.net',
+        port: 465,
+        secure: true,
+        secureConnection: false,
+        tls: {
+            ciphers:'SSLv3',
+        },
+        requireTLS:true,
+        debug: true,
         // secure: false,
-        service: 'gmail',
+        // service: 'gmail',
         auth: {
           user: process.env.EMAIL,
           pass: process.env.EMAIL_PWD,
@@ -54,7 +74,8 @@ export async function GET(request,{params}) {
                         // send mail with defined transport object
                         let info = await transporter.sendMail({
                             name: 'Dear Me,',
-                            from: '"Dear Me," <smartcampus@svecw.edu.in>', // sender address
+                            from: '"Dear Me," <product@heydear.me>', // sender address
+                            // from: '"Dear Me," <smartcampus@svecw.edu.in>', // sender address
                             // from: '"Smart campus" <hello.helpmecode@gmail.com>', // sender address
                             to: rows[0].email, // list of receivers
                             subject: "OTP for "+rows[0].collegeId+" login", // Subject line
@@ -63,6 +84,9 @@ export async function GET(request,{params}) {
                             // html: '<center><table style="text-align: center;border:1px solid  rgba(80,80,80,0.3);border-radius:8px; padding:16px;"><tr><td><h1 style="color:#333;font-size:20px">Login to Smart Campus</h1></td></tr><tr><td><p>Copy and paste below OTP to verify your '+rows[0].collegeId+' login</p></td></tr><tbody><tr><td><h1 style="background-color: #f5f5f5;text-align: center;padding: 10px;border-radius:8px;">'+params.ids[2]+'</h1></td></tr> <tr><td><p style="color: #697882;">Smart Campus<br><span style="font-size:14px">A smart assistant to you at your campus.</span></p></td></tr><tr><td height="10" style="line-height:1px;font-size:1px;height:10px">&nbsp;</td></tr><tr><td><br><div style="display: flex;flex-direction:row;justify-content: space-between;color: #697882;"><span><a href="https://piltovr.com" style="text-decoration:none;color:#697882" target="_blank">A Piltovr Product</a></span><a href="https://www.smartcampus.tools/privacy" style="text-decoration:none;color:#697882" target="_blank" data-saferedirecturl="https://www.google.com/url?q=https://www.smartcampus.tools/privacy&amp;source=gmail&amp;ust=1701507513628000&amp;usg=AOvVaw0a_wK1kV3y2bLZRnHvj_cK">Privacy policy</a></div></td></tr></tbody></table><br></center>', // html body
                             // html: '<center><table style="text-align: center;"><tr><td><h1 style="color:#333;font-size:20px">Login to Smart Campus</h1></td></tr><tr><td><p>Copy and paste below OTP to verify your '+rows[0].collegeId+' login</p></td></tr><tbody><tr><td><h1 style="background-color: #f5f5f5;text-align: center;padding: 10px;">'+params.ids[2]+'</h1></td></tr> <tr><td><p>Smart Campus, a smart assistant to you at your campus.</p></td></tr></tbody></table><br></center>', // html body
                             // html: '<center><table><tr><td><p>Copy and paste below OTP to verify your login</p></td></tr> <tr><td><h1 style="background-color:#f5f5f5,text-align:center">'+params.ids[2]+'</h1></td></tr></table><br/></center>', // html body
+                        }).then((info) => {
+                            console.log('Email sent: %s', info.messageId);
+                            return info;
                         });
                     }
 

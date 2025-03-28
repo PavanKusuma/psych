@@ -132,6 +132,7 @@ export default function AssessmentDetail({ searchParams}) {
     const [allStudents, setAllStudents] = useState([]);
     const [uniqueBranches, setUniqueBranches] = useState([]);
     const [uniqueYears, setUniqueYears] = useState([]);
+    const [uniqueSections, setUniqueSections] = useState([]);
     
     const [assessmentId, setAssessmentId] = useState(searchParams.id);
     const [assessmentTitle, setAssessmentTitle] = useState(searchParams.title);
@@ -145,6 +146,7 @@ export default function AssessmentDetail({ searchParams}) {
     const [selectedResultType, setSelectedResultType] = useState("All result types");
     const [selectedBranchType, setSelectedBranchType] = useState("All Branches");
     const [selectedYearType, setSelectedYearType] = useState("All Years");
+    const [selectedSectionType, setSelectedSectionType] = useState("All Sections");
 
 
     // this is to save the jsonResult for verification
@@ -233,6 +235,15 @@ export default function AssessmentDetail({ searchParams}) {
                     }
                 });
                 setUniqueYears(uniqueYears1);
+                
+                // set unique sections
+                const uniqueSections1 = [];
+                resultData2.data.forEach(student => {
+                    if (!uniqueSections1.includes(student.section)) {
+                        uniqueSections1.push(student.section);
+                    }
+                });
+                setUniqueSections(uniqueSections1);
 
                 // const uniqueBranchYear = [];
                 // resultData2.data.forEach(student => {
@@ -306,10 +317,13 @@ export default function AssessmentDetail({ searchParams}) {
  const handleYearTypeChange = (e) => {
     setSelectedYearType(e);
   };
+ const handleSectionTypeChange = (e) => {
+    setSelectedSectionType(e);
+  };
 
   // Function to filter students based on result type
   const filteredStudents = allStudents.filter((student) => {
-    if (selectedResultType === "All result types" && selectedBranchType === "All Branches" && selectedYearType === "All Years") {
+    if (selectedResultType === "All result types" && selectedBranchType === "All Branches" && selectedYearType === "All Years" && selectedSectionType === "All Sections") {
       return true; // Show all students when "All result types" is selected
     }
     // else if(selectedResultType !== "All result types" && selectedBranchType !== "All Branches" && selectedYearType !== "All Years"){
@@ -321,27 +335,33 @@ export default function AssessmentDetail({ searchParams}) {
     //         // return resultData.title === selectedResultType;
     //     }
     // }
-    else if(selectedBranchType === "All Branches" && selectedYearType === "All Years"){
+    else if(selectedBranchType === "All Branches" && selectedYearType === "All Years" && selectedSectionType === "All Sections"){
         
         if(getResultDataByCollegeId(student.collegeId).title == selectedResultType){
             return getResultDataByCollegeId(student.collegeId);
         }
     }
-    else if(selectedBranchType !== "All Branches" && selectedYearType === "All Years"){
+    else if(selectedBranchType !== "All Branches" && selectedYearType === "All Years" && selectedSectionType === "All Sections"){
         
         if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.branch == selectedBranchType){
             return getResultDataByCollegeId(student.collegeId);
         }
     }
-    else if(selectedBranchType === "All Branches" && selectedYearType !== "All Years"){
+    else if(selectedBranchType === "All Branches" && selectedYearType !== "All Years" && selectedSectionType === "All Sections"){
         
         if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.year.toString() == selectedYearType.toString()){
             return getResultDataByCollegeId(student.collegeId);
         }
     }
-    else if(selectedBranchType !== "All Branches" && selectedYearType !== "All Years"){
+    else if(selectedBranchType === "All Branches" && selectedYearType === "All Years" && selectedSectionType !== "All Sections"){
         
-        if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.branch == selectedBranchType && student.year.toString() == selectedYearType.toString()){
+        if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.section.toString() == selectedSectionType.toString()){
+            return getResultDataByCollegeId(student.collegeId);
+        }
+    }
+    else if(selectedBranchType !== "All Branches" && selectedYearType !== "All Years" && selectedSectionType !== "All Sections"){
+        
+        if((getResultDataByCollegeId(student.collegeId).title == selectedResultType || selectedResultType=='All result types') && student.branch == selectedBranchType && student.year.toString() == selectedYearType.toString() && student.section.toString() == selectedSectionType.toString()){
             return getResultDataByCollegeId(student.collegeId);
         }
     }
@@ -752,6 +772,23 @@ function studentsDownloadNow(resultId) {
                         <SelectItem key='All Years' value='All Years' className="text-black">All Years</SelectItem>
                             {uniqueYears.map((year) => (
                                 <SelectItem key={year} value={year} className="text-black">{year}</SelectItem>))}
+                            {/* {allResults.filter(row => row.role === 'SalesExecutive').map((row) => (
+                                <SelectItem key={row.id} value={row.id} className="text-black">{row.name}<br/>{row.mapTo}</SelectItem>))} */}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                
+                {/* section filter */}
+                <Select value={selectedSectionType} onValueChange={(e)=>handleSectionTypeChange(e)}>
+                    <SelectTrigger className="text-black">
+                        <SelectValue placeholder="All Sections" className="text-black" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                        {/* <SelectLabel className="text-black">All result types</SelectLabel> */}
+                        <SelectItem key='All Sections' value='All Sections' className="text-black">All Sections</SelectItem>
+                            {uniqueSections.map((section) => (
+                                <SelectItem key={section} value={section} className="text-black">{section}</SelectItem>))}
                             {/* {allResults.filter(row => row.role === 'SalesExecutive').map((row) => (
                                 <SelectItem key={row.id} value={row.id} className="text-black">{row.name}<br/>{row.mapTo}</SelectItem>))} */}
                         </SelectGroup>

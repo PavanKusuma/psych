@@ -61,14 +61,24 @@ fetch("/api/psych/assessments/"+pass+"/"+role+"/2/"+campusId+"/"+offset, {
 
 
 // get the appointments for PsychAdmin
-const getStudentsDataAPI = async (pass, role, students) =>  
-fetch("/api/psych/assessments/"+pass+"/"+role+"/3/"+students, {
-    method: "GET",
-    headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-    },
-});
+const getStudentsDataAPI = async (pass, role, students) =>
+    fetch("/api/psych/assessments", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+        body: JSON.stringify({ pass: pass, role: role, type: 3, students: students }),
+    });
+// get the appointments for PsychAdmin
+// const getStudentsDataAPI = async (pass, role, students) =>  
+// fetch("/api/psych/assessments/"+pass+"/"+role+"/3/"+students, {
+//     method: "GET",
+//     headers: {
+//         "Content-Type": "application/json",
+//         Accept: "application/json",
+//     },
+// });
 
 // get question answers of assessments
 const getQuestionAnswersOfAssessmentDataAPI = async (pass, studentId, campusId, assessmentId) =>  
@@ -216,6 +226,7 @@ export default function AssessmentDetail({ searchParams}) {
             
                 const resultData2 = await result2.json() // get data
                 console.log(resultData2);
+                console.log("resultData2");
                 setAllStudents(resultData2.data);
 
                 // set unique branches

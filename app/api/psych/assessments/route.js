@@ -1,5 +1,5 @@
-import pool from '../../../db'
-import { Keyverify } from '../../../secretverify';
+import pool from '../../db'
+import { Keyverify } from '../../secretverify';
 import dayjs from 'dayjs'
 
 // 1 role – SuperAdmin / PAdmin / Student
@@ -7,28 +7,24 @@ import dayjs from 'dayjs'
 // 3 campusId - SVECW or All
 // 4 collegeId - Super33
 
-export async function POST(request, { params }) {
+export async function POST(request) {
     try {
-        const { students } = await request.json();
-        // if (!students || !Array.isArray(students)) {
-        //     return Response.json({ status: 400, message: 'Invalid input' }, { status: 200 });
-        // }
+        const { pass, role, type, students } = await request.json();
 
         // Authorize secret key
-        if (!(await Keyverify(params.ids[0]))) {
+        if (!(await Keyverify(pass))) {
             return Response.json({ status: 401, message: 'Unauthorized' }, { status: 200 });
         }
 
         // Only allow for PsychAdmin and correct route
-        if (params.ids[1] !== 'PsychAdmin' || params.ids[2] !== '3') {
+        if (role !== 'PsychAdmin' || type !== 3) {
             return Response.json({ status: 403, message: 'Forbidden' }, { status: 200 });
         }
 
         const connection = await pool.getConnection();
-        const formattedIds = students.map(id => `'${id}'`).join(', ');
+        const formattedIds = students.split(',').map(id => `'${id}'`).join(', ');
         const query = `SELECT username, collegeId, campusId, email, gender, phoneNumber, course, branch, year, section FROM users WHERE collegeId IN (${formattedIds})`;
         const [rows] = await connection.execute(query);
-        console.log(rows);
         
         connection.release();
 
@@ -50,11 +46,11 @@ export async function GET(request,{params}) {
     try{
 
         // authorize secret key
-        if(await Keyverify(params.ids[0])){
+        if(await Keyverify(params[0])){
             
                 // check for the user role
                 // if SuperAdmin, get all the requests w.r.t status
-                if(params.ids[1] == 'Student'){
+                if(params[1] == 'Student'){
 
                     let query = '';
                     // check what type of requests to be shown
@@ -82,8 +78,8 @@ export async function GET(request,{params}) {
                             LEFT JOIN (SELECT assessmentId, collegeId, createdOn FROM psych_answers order by createdOn DESC LIMIT 1) ans 
                             ON a.assessmentId = ans.assessmentId AND ans.collegeId = ?
                             WHERE a.campusId = ? ORDER BY a.createdOn ASC`;
-                    // query = 'SELECT * FROM psych_assessments WHERE campusId = "'+params.ids[5]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[3];
-                    const [rows, fields] = await connection.execute(query, [params.ids[4], params.ids[3]]);
+                    // query = 'SELECT * FROM psych_assessments WHERE campusId = "'+params[5]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params[3];
+                    const [rows, fields] = await connection.execute(query, [params[4], params[3]]);
                     connection.release();
 
                     // check if user is found
@@ -100,18 +96,18 @@ export async function GET(request,{params}) {
 
                 // check for the user role
                 // if SuperAdmin, get all the requests w.r.t status
-                else if(params.ids[1] == 'PsychAdmin'){
+                else if(params[1] == 'PsychAdmin'){
 
                     // get the list of assessments
-                    if(params.ids[2] == 1) {
+                    if(params[2] == 1) {
                         let query = '';
                         // check what type of requests to be shown
 
-                        if(params.ids[3] == 'All'){
-                            query = 'SELECT * FROM psych_assessments ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                        if(params[3] == 'All'){
+                            query = 'SELECT * FROM psych_assessments ORDER BY createdOn DESC LIMIT 20 OFFSET '+params[4];
                         }
                         else {
-                            query = 'SELECT * FROM psych_assessments where campusId = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                            query = 'SELECT * FROM psych_assessments where campusId = "'+params[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params[4];
                         }
                         
                         // console.log(query);
@@ -131,13 +127,13 @@ export async function GET(request,{params}) {
                     }
 
                     // get the list of assessment results
-                    else if(params.ids[2] == 2){
+                    else if(params[2] == 2){
                         let query1 = '', query2 = '';
                         // check what type of requests to be shown
 
-                        query1 = 'SELECT * FROM psych_results where assessmentId = "'+params.ids[3]+'"';
-                        query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params.ids[3]+'" ORDER BY createdOn DESC';
-                        // query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params.ids[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params.ids[4];
+                        query1 = 'SELECT * FROM psych_results where assessmentId = "'+params[3]+'"';
+                        query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params[3]+'" ORDER BY createdOn DESC';
+                        // query2 = 'SELECT * FROM psych_answers where assessmentId = "'+params[3]+'" ORDER BY createdOn DESC LIMIT 20 OFFSET '+params[4];
                         
                         // console.log(query1);
                         const [rows, fields] = await connection.execute(query1);
@@ -156,9 +152,9 @@ export async function GET(request,{params}) {
                         }
                     }
                     // get the students of specific result type of an assessment
-                    else if(params.ids[2] == 3){
+                    else if(params[2] == 3){
                         let query1 = '', query2 = '';
-                        const collegeIds = params.ids[3].split(',');
+                        const collegeIds = params[3].split(',');
                         const formattedIds = collegeIds.map(id => `'${id}'`).join(', ');
 
                         // check what type of requests to be shown
@@ -182,11 +178,11 @@ export async function GET(request,{params}) {
                     }
 
                     // get list of assessments taken by student
-                    else if(params.ids[2] == 4){
+                    else if(params[2] == 4){
                         let query1 = '';
                         
                         // check what type of requests to be shown
-                        query1 = 'SELECT *, aa.title as assessmentTitle, a.createdOn as assessedOn FROM psych_answers a JOIN psych_assessments aa ON a.assessmentId=aa.assessmentId JOIN psych_results r ON a.resultId=r.resultId where collegeId = "'+params.ids[3]+'"';
+                        query1 = 'SELECT *, aa.title as assessmentTitle, a.createdOn as assessedOn FROM psych_answers a JOIN psych_assessments aa ON a.assessmentId=aa.assessmentId JOIN psych_results r ON a.resultId=r.resultId where collegeId = "'+params[3]+'"';
                         const [rows1, fields1] = await connection.execute(query1);
                         
                         var questions = [];
@@ -224,7 +220,7 @@ export async function GET(request,{params}) {
 
 
             // search for user based on the provided collegeId
-            // const [rows, fields] = await connection.execute('SELECT * FROM request where isOpen = 1 and collegeId = "'+params.ids[2]+'" ORDER BY requestDate LIMIT 5 OFFSET '+params.ids[4]);
+            // const [rows, fields] = await connection.execute('SELECT * FROM request where isOpen = 1 and collegeId = "'+params[2]+'" ORDER BY requestDate LIMIT 5 OFFSET '+params[4]);
             
         }
         else {
